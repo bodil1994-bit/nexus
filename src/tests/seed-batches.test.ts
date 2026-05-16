@@ -48,6 +48,23 @@ describe('seedSupplierBatches', () => {
     expect(bd.grossCapacityKwh).toBeGreaterThan(0);
   });
 
+  it('battery data stores carbon footprint leaves as top-level fields', async () => {
+    const passport = await prisma.digitalProductPassport.findFirst({
+      include: { batteryData: true },
+    });
+    expect(passport).not.toBeNull();
+    const bd = passport!.batteryData!;
+
+    expect(bd.carbonFootprintTotalValueKgCo2ePerKwh).toBe(148);
+    expect(bd.carbonFootprintTotalTotalKgCo2e).toBe(92.5);
+    expect(bd.carbonFootprintPerformanceClassValue).toBe('C');
+    expect(bd.carbonDeclarationBatteryModelNominalVoltageV).toBe(36);
+    expect(bd.carbonFootprintLifecycleEndOfLifeKgCo2e).toBe(-16.7);
+    expect(bd.carbonDeclarationCarbonFootprintReportUrl).toBe(
+      'www.bosch-ebike.com/assets/lca-powertube-625.pdf',
+    );
+  });
+
   it('battery passport seed fields are not compound delimited values', async () => {
     const passport = await prisma.digitalProductPassport.findFirst({
       include: { batteryData: true },

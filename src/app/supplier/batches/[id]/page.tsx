@@ -120,14 +120,19 @@ export default async function BatchDetailPage({ params }: { params: Promise<{ id
                   <dl className="space-y-3">
                     {[
                       ['Manufacturer ID', bd.manufacturerIdentification],
-                      ['Category & Model', bd.batteryCategoryAndModel],
                       ['Place of Manufacture', bd.placeOfManufacture],
                       ['Chemical Composition', bd.chemicalComposition],
                       ['Hazardous Substances', bd.hazardousSubstances],
                       ['Critical Raw Materials', bd.criticalRawMaterials],
-                      ['Carbon Footprint Total', bd.carbonFootprintTotal],
-                      ['CO2 Performance Class', bd.carbonFootprintPerformanceClass],
-                      ['CO2 Lifecycle Breakdown', bd.carbonFootprintLifecycleBreakdown],
+                      [
+                        'Carbon Footprint (kg CO2e/kWh)',
+                        bd.carbonFootprintTotalValueKgCo2ePerKwh,
+                      ],
+                      ['CO2 Performance Class', bd.carbonFootprintPerformanceClassValue],
+                      [
+                        'CO2 Raw Material Extraction',
+                        bd.carbonFootprintLifecycleRawMaterialExtractionKgCo2e,
+                      ],
                       ['Recycled Content — Cobalt', bd.recycledContentCobalt],
                       ['Recycled Content — Lithium', bd.recycledContentLithium],
                       ['Recycled Content — Nickel', bd.recycledContentNickel],
