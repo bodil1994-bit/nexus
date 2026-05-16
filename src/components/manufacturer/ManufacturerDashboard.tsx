@@ -3,26 +3,18 @@
 import { useEffect, useState } from 'react';
 import { calculateDashboardStats } from '@/lib/manufacturer/dashboardStats';
 import { ManufacturerKpiCards } from './ManufacturerKpiCards';
-
-type BatchLike = { status: string };
-
-type Order = {
-  id: string;
-  orderNumber: string;
-  supplier: { id: string; name: string; email?: string | null };
-  manufacturer: { id: string; name: string };
-  batches: BatchLike[];
-};
+import { ManufacturerBatchTable, type OrderRow } from './ManufacturerBatchTable';
 
 export function ManufacturerDashboard() {
-  const [orders, setOrders] = useState<Order[] | null>(null);
+  const [orders, setOrders] = useState<OrderRow[] | null>(null);
   const [error, setError] = useState(false);
+  const [selectedBatchId, setSelectedBatchId] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/manufacturer/orders')
       .then((res) => {
         if (!res.ok) throw new Error('fetch failed');
-        return res.json() as Promise<{ orders: Order[] }>;
+        return res.json() as Promise<{ orders: OrderRow[] }>;
       })
       .then((data) => setOrders(data.orders))
       .catch(() => setError(true));
@@ -51,7 +43,7 @@ export function ManufacturerDashboard() {
 
   return (
     <div className="min-h-screen bg-zinc-50 py-12 px-4">
-      <div className="mx-auto max-w-5xl">
+      <div className="mx-auto max-w-7xl">
         <div className="mb-8">
           <h1 className="text-2xl font-semibold text-zinc-900">Manufacturer Dashboard</h1>
           {manufacturerName && (
@@ -67,7 +59,16 @@ export function ManufacturerDashboard() {
             No supplier batches submitted yet. Supplier submissions will appear here once uploaded.
           </p>
         ) : (
-          <ManufacturerKpiCards stats={stats} />
+          <>
+            <ManufacturerKpiCards stats={stats} />
+            <ManufacturerBatchTable
+              orders={orders}
+              onSelectBatch={setSelectedBatchId}
+            />
+            {selectedBatchId && (
+              <p className="mt-4 text-xs text-zinc-400">Selected: {selectedBatchId}</p>
+            )}
+          </>
         )}
       </div>
     </div>
