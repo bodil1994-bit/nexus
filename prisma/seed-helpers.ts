@@ -56,6 +56,7 @@ export async function seedSupplierBatches(prisma: PrismaClient) {
         orderNumber: 'ORD-KTM-BSH-2024',
         batchNumber: 'BAT-BSH-PT625-002',
         passportReferenceId: 'BAT-BSH-PT625-2024-008314',
+        passportUrl: '/passport/BAT-BSH-PT625-2024-008314',
       }),
     },
   });
@@ -81,7 +82,7 @@ export async function seedSupplierBatches(prisma: PrismaClient) {
     data: {
       passportId: 'BAT-BSH-PT625-2024-008314',
       passportType: 'BATTERY',
-      passportUrl: 'https://bat-passport.bosch.com/BAT-BSH-PT625-2024-008314',
+      passportUrl: '/passport/BAT-BSH-PT625-2024-008314',
       batchId: erpSyncedBatch.id,
     },
   });
@@ -90,7 +91,7 @@ export async function seedSupplierBatches(prisma: PrismaClient) {
     data: {
       passportId: 'BAT-BSH-PT500-2024-008315',
       passportType: 'BATTERY',
-      passportUrl: 'https://bat-passport.bosch.com/BAT-BSH-PT500-2024-008315',
+      passportUrl: '/passport/BAT-BSH-PT500-2024-008315',
       batchId: missingBatch.id,
       batteryData: {
         create: {
