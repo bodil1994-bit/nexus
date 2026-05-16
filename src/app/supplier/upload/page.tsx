@@ -1,9 +1,11 @@
+import { submitBatch } from './actions';
+
 export default function SupplierUploadPage() {
   return (
     <div className="min-h-screen bg-zinc-50 py-12 px-4">
       <div className="max-w-lg mx-auto bg-white rounded-xl shadow-sm border border-zinc-200 p-8">
         <h1 className="text-2xl font-semibold text-zinc-900 mb-6">Submit Batch Passport</h1>
-        <form method="POST" action="/api/supplier/batch-submissions" encType="multipart/form-data" className="flex flex-col gap-5">
+        <form action={submitBatch} encType="multipart/form-data" className="flex flex-col gap-5">
           <div className="flex flex-col gap-1.5">
             <label htmlFor="orderNumber" className="text-sm font-medium text-zinc-700">
               Order Number
