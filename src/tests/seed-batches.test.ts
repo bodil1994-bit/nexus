@@ -48,6 +48,20 @@ describe('seedSupplierBatches', () => {
     expect(bd.grossCapacityKwh).toBeGreaterThan(0);
   });
 
+  it('battery passport seed fields are not compound delimited values', async () => {
+    const passport = await prisma.digitalProductPassport.findFirst({
+      include: { batteryData: true },
+    });
+    expect(passport).not.toBeNull();
+    const bd = passport!.batteryData!;
+
+    const compoundFields = Object.entries(bd)
+      .filter(([, value]) => typeof value === 'string' && value.includes(';'))
+      .map(([field]) => field);
+
+    expect(compoundFields).toEqual([]);
+  });
+
   it('processing and missing_information batches have no passport', async () => {
     const batches = await prisma.batch.findMany({
       where: { status: { in: ['processing', 'missing_information'] } },
