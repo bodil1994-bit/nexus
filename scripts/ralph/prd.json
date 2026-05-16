@@ -1,115 +1,91 @@
 {
   "project": "Veloport",
-  "branchName": "supplier-batch-passport-upload",
-  "description": "Supplier batch passport upload workflow - supplier creates batches, uploads files, sees extraction status and missing fields.",
+  "branchName": "feature/customer-passport-view",
+  "description": "Customer-facing Digital Product Passport: a public visualized passport page at /passport/[passportId], seeded end-to-end with the ERP-synced batch, and linked from the manufacturer dashboard.",
   "userStories": [
     {
-      "id": "US-001",
-      "title": "Prisma schema: Batch and PassportDocument models",
-      "description": "As a developer, I need DB models for batches and passport documents so the workflow has persistent storage.",
+      "id": "US-DPP-001",
+      "title": "Seed: passportUrl points to local route and erpPayload includes it",
+      "description": "As a developer, I need the seeded ERP-synced passport to have a passportUrl pointing to our own /passport/[passportId] route (not an external domain), and for that URL to also appear in erpPayloadJson, so the end-to-end example is self-contained.",
       "acceptanceCriteria": [
-        "Add Batch model with fields: id, orderNumber, batchNumber, status (processing|complete|missing_information), createdAt, updatedAt",
-        "Add PassportDocument model with fields: id, batchId (FK), filename, extractedFields (Json), missingFields (String[]), createdAt",
-        "Generate and apply Prisma migration",
-        "Write a Vitest unit test that imports the Prisma client and asserts Batch and PassportDocument models exist (check prisma.batch and prisma.passportDocument are defined)",
-        "npm test passes",
-        "npm run typecheck passes"
+        "In prisma/seed-helpers.ts, change the erpSyncedBatch passport passportUrl from 'https://bat-passport.bosch.com/BAT-BSH-PT625-2024-008314' to '/passport/BAT-BSH-PT625-2024-008314'",
+        "In the same file, update erpPayloadJson for the erpSyncedBatch to include a passportUrl key: '/passport/BAT-BSH-PT625-2024-008314' (alongside existing orderNumber, batchNumber, passportReferenceId)",
+        "Also update the missingBatch passportUrl to '/passport/BAT-BSH-PT500-2024-008315' for consistency",
+        "Run 'npx prisma db seed' and verify it completes without errors",
+        "Write a Vitest test in src/tests/seed-passport-url.test.ts that: (1) calls seedKtmBoschOrder (or queries the DB), (2) asserts the ERP-synced passport's passportUrl starts with '/passport/', (3) asserts JSON.parse(erpSyncedBatch.erpPayloadJson).passportUrl starts with '/passport/'",
+        "npm run typecheck passes",
+        "npm test passes"
       ],
       "priority": 1,
-      "passes": true,
-      "notes": "Added createdAt/updatedAt to Batch, added PassportDocument model with Json fields (SQLite has no String[]). Migration 20260516133923 applied."
+      "passes": true
     },
     {
-      "id": "US-002",
-      "title": "Seed data: one batch per status",
-      "description": "As a developer, I need seed data covering all three statuses so the UI can be tested and demonstrated without uploads.",
+      "id": "US-DPP-002",
+      "title": "buildRetailerPassport pure function",
+      "description": "As a developer, I need a pure function that derives the customer-facing passport view data from BatteryPassportData so the passport page has no business logic in the component.",
       "acceptanceCriteria": [
-        "Seed creates exactly three batches: one with status processing, one complete, one missing_information",
-        "Each batch has at least one PassportDocument with mocked extractedFields (product_name, material, origin_country, supplier_name, sustainability_notes)",
-        "The missing_information batch has at least two fields in missingFields",
-        "The complete batch has all five canonical fields populated",
-        "npx prisma db seed runs without error",
-        "Write a Vitest test that runs the seed logic (or imports seed helpers) and asserts exactly three batches exist with statuses: processing, complete, missing_information",
-        "npm test passes",
-        "npm run typecheck passes"
+        "Create src/lib/retailer/buildRetailerPassport.ts exporting: buildRetailerPassport(data: BatteryPassportData): RetailerPassportView",
+        "RetailerPassportView type exported from the same file: { batteryModel: string; batteryChemistry: string; grossCapacityKwh: number | null; carbonFootprintKgCo2ePerKwh: number | null; overallGrade: 'A'|'B'|'C'|'D'|'E'; specs: Array<{label: string; value: string}>; flags: Array<{keyword: string; positive: boolean; detail: string}>; categories: Array<{id: string; title: string; grade: 'A'|'B'|'C'|'D'|'E'; summary: string; points: Array<{label: string; value: string; grade: 'A'|'B'|'C'|'D'|'E'}>}> }",
+        "overallGrade derives from carbonFootprintPerformanceClassValue ('A'|'B'|'C'|'D'|'E' → same letter; null or unknown → 'C')",
+        "specs includes at minimum 4 entries: Capacity (e.g. '625 Wh' from grossCapacityKwh*1000), Voltage (from carbonDeclarationBatteryModelNominalVoltageV, e.g. '36 V'), Chemistry (from batteryChemistry), Weight (from batteryWeight); fallback 'N/A' for nulls",
+        "flags has exactly 10 items (5 positive=true, 5 positive=false). Positive flags: (1) 'EU Compliance' if declarationOfConformityRef is set; (2) 'EU Manufacturing' if placeOfManufacture includes 'Germany' or 'Bavaria'; (3) 'Carbon Methodology Declared' if carbonFootprintTotalCalculationBasis is set; (4) 'QR Code Affixed' if qrCodeAffixed is true; (5) 'Fire Safety Declared' if fireExtinguishingAgent is set. Negative flags: (6) 'No Recycled Cobalt' if recycledCobaltPercentage is 0 or null; (7) 'No Recycled Lithium' if recycledLithiumPercentage is 0 or null; (8) 'Preliminary Carbon Class' if carbonFootprintPerformanceClassStatus is 'preliminary'; (9) 'Critical Raw Materials' if criticalRawMaterials is set and non-empty; (10) 'No Renewable Content Data' if renewableContentShare is null or empty string",
+        "categories has exactly 5 entries: (1) id='carbon' title='Carbon Footprint' grade from carbonFootprintPerformanceClassValue; (2) id='recycled' title='Recycled Content' grade='D' if both recycled percentages are 0, else 'B'; (3) id='performance' title='Capacity & Performance' grade='A' if grossCapacityKwh >= 0.6; (4) id='compliance' title='Compliance & Conformity' grade='A' if declarationOfConformityRef is set else 'C'; (5) id='origin' title='Manufacturing Origin' grade='A' if placeOfManufacture includes 'Germany' or 'Bavaria' else 'C'. Each category has a summary string and at least 2 data points.",
+        "Write src/tests/buildRetailerPassport.test.ts with Vitest tests: (1) given seeded BatteryPassportData shape, overallGrade === 'C'; (2) flags.length === 10; (3) flags.filter(f => f.positive).length === 5; (4) specs.length >= 4; (5) categories.length === 5",
+        "npm run typecheck passes",
+        "npm test passes"
       ],
       "priority": 2,
-      "passes": true,
-      "notes": "seedSupplierBatches helper exported from prisma/seed-helpers.ts. 4 integration tests pass."
+      "passes": true
     },
     {
-      "id": "US-003",
-      "title": "Supplier upload page: form UI",
-      "description": "As a supplier, I can open an upload page and fill in order number, batch number, and attach passport files.",
+      "id": "US-DPP-003",
+      "title": "API route GET /api/passport/[passportId]",
+      "description": "As the passport page, I need an API endpoint that returns passport data by passportId so the client can render the customer view.",
       "acceptanceCriteria": [
-        "Route exists at /supplier/upload",
-        "Form has text input for order number",
-        "Form has text input for batch number",
-        "Form has file input accepting .csv, .json, .xlsx, .xml, .pdf, .txt (multiple files allowed)",
-        "Submit button is present",
-        "Page is navigable from app root or has a link from the home page",
+        "Create src/app/api/passport/[passportId]/route.ts with a GET handler",
+        "Query: prisma.digitalProductPassport.findUnique({ where: { passportId }, include: { batteryData: true } })",
+        "Return 200 JSON { passport: { id, passportId, passportUrl, passportType, batteryData } } on success",
+        "Return 404 JSON { error: 'Not found' } if no passport matches",
         "npm run typecheck passes",
         "npm run lint passes"
       ],
       "priority": 3,
-      "passes": true,
-      "notes": "Route at /supplier/upload. Form with orderNumber, batchNumber, multi-file input. Nav links on home page."
+      "passes": false
     },
     {
-      "id": "US-004",
-      "title": "Batch creation with mock extraction",
-      "description": "As a supplier, submitting the upload form creates a batch and runs mock extraction so I get results without real AI.",
+      "id": "US-DPP-004",
+      "title": "Public passport page: bike overview and battery passport screens",
+      "description": "As a customer scanning a QR code, I can visit /passport/[passportId] and see a mobile-optimized two-screen Digital Product Passport: a bike overview and a battery passport detail.",
       "acceptanceCriteria": [
-        "Form submission calls a server action or API route",
-        "Server action creates a Batch record with status processing initially",
-        "Mock extraction runs synchronously: randomly assigns complete or missing_information status",
-        "Creates a PassportDocument with mocked extractedFields for each uploaded file",
-        "Missing_information batches have at least one entry in missingFields",
-        "After submission, user is redirected to /supplier/batches or sees success feedback",
-        "Write Vitest unit tests for the mock extraction function: (1) returns status complete or missing_information, (2) always returns all five canonical field keys in extractedFields, (3) missing_information result has non-empty missingFields array",
-        "npm test passes",
+        "Create src/app/passport/[passportId]/page.tsx as a Next.js server component. It queries prisma directly (no API fetch on server). Passes the result to a client PassportView component. Renders a 404-style message if passportId not found.",
+        "Create src/app/passport/[passportId]/PassportView.tsx as a 'use client' component. useState<'bike'|'battery'> for active screen.",
+        "BIKE OVERVIEW SCREEN layout (top to bottom): (a) small header bar with 'veloport' wordmark and emerald 'v' logo icon matching the home page nav style; (b) a rounded-2xl card with an e-bike hero image — use <img src='https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=800&q=80' ... className='w-full h-56 object-cover rounded-t-2xl' />; (c) below the image inside the card: bike name heading ('KTM Macina Sport 720'), subtext 'Digital Product Passport'; (d) a 2-column grid of 4 component cards labeled Frame, Battery, Wheels, Motor. Battery card: bg-white border-emerald-200 border-2, shows GradePill for overallGrade + 'Battery' label + batteryModel subtext + a right arrow icon; clicking it sets page to 'battery'. Other 3 cards: bg-white/60 border-slate-200, same layout but grade pill grayed and a small 'Coming soon' badge, clicking shows nothing (or a toast if preferred).",
+        "BATTERY SCREEN layout (top to bottom): (a) top bar with back arrow (ChevronLeft from lucide-react, onClick sets page to 'bike') + 'Battery Passport' title; (b) header card: 'Battery passport' caps label, batteryModel as display heading, specs row (Capacity · Voltage · Weight), GradePill (size lg: 56px box, 28px font) for overallGrade aligned right; (c) FLAGS SECTION: 'ESG Profile' heading, flex-wrap row of 10 flag chips — positive flags styled with bg-green-50 border border-green-200 text-green-800, negative flags styled with bg-red-50 border border-red-200 text-red-800 — each chip shows a colored dot + keyword text, rounded-full px-3 py-1 text-xs font-medium; (d) DEEP DIVE SECTION: 'Category Breakdown' heading, 5 collapsible accordion rows. Each row: rounded-xl bg-white border border-slate-200 px-4 py-3 flex items-center gap-3. Left: stone-colored icon tile (w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center). Middle: title text-sm font-semibold + summary text-xs text-slate-500. Right: GradePill (sm: 28px box) + ChevronDown/Up. Expanded body: border-t border-slate-100 pt-3 mt-3, list of data points each as a row with caps label + value + small grade pill.",
+        "STYLING rules: page bg-slate-50 min-h-screen. Container max-w-md mx-auto px-5 py-8. Cards bg-white rounded-2xl border border-slate-200 shadow-sm. Text text-slate-900 / text-slate-500. Accent emerald-600. Geist font (inherited from layout). GradePill colors: A bg #166534, B bg #65a30d, C bg #ca8a04, D bg #ea580c, E bg #991b1b — all white text, bold.",
+        "Navigating to /passport/BAT-BSH-PT625-2024-008314 with seeded data shows the Bosch PowerTube 625 Wh passport with overallGrade C.",
         "npm run typecheck passes",
         "npm run lint passes"
       ],
       "priority": 4,
-      "passes": true,
-      "notes": "submitBatch server action in src/app/supplier/upload/actions.ts. mockExtract in src/lib/mock-extraction.ts. Redirects to /supplier/batches."
+      "passes": false
     },
     {
-      "id": "US-005",
-      "title": "Batch list with status badges",
-      "description": "As a supplier, I can see all my batches and their processing status at a glance.",
+      "id": "US-DPP-005",
+      "title": "Manufacturer dashboard: Customer Passport link for ERP-synced batches",
+      "description": "As a manufacturer, I can click 'View Customer Passport' in the batch detail panel for ERP-synced batches to see the end-customer view.",
       "acceptanceCriteria": [
-        "Route exists at /supplier/batches",
-        "Lists all batches ordered by createdAt descending",
-        "Each row shows: order number, batch number, status badge, created date",
-        "Status badge colors: processing=yellow, complete=green, missing_information=red",
-        "Link or button from /supplier/batches to /supplier/upload",
-        "Page works with seed data (shows three batches)",
+        "In src/components/manufacturer/ManufacturerBatchDetail.tsx, find the section that renders passportUrl as monospace text (currently labeled 'Internal Passport URL')",
+        "Replace it: when batch.status === 'ERP_SYNCED' and batch.passport?.passportUrl is truthy, render a Link/anchor with label 'View Customer Passport', href={batch.passport.passportUrl}, target='_blank' rel='noopener noreferrer'",
+        "Style the link as an emerald button: className includes 'inline-flex items-center gap-2 px-5 py-2 rounded-full bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-600 transition-colors shadow-sm shadow-emerald-500/20'",
+        "Include the ExternalLink icon from lucide-react (size 14) inside the link",
+        "The 'Internal Passport URL' dt/dd block is fully removed — the button replaces it",
+        "If batch.status !== 'ERP_SYNCED' or passportUrl is null/undefined, render nothing (omit the section)",
+        "The seeded ERP-synced batch shows the link pointing to /passport/BAT-BSH-PT625-2024-008314",
         "npm run typecheck passes",
         "npm run lint passes"
       ],
       "priority": 5,
-      "passes": true,
-      "notes": "Route at /supplier/batches. Table with order, batch, status badge (yellow/green/red), created date. Link to /supplier/upload."
-    },
-    {
-      "id": "US-006",
-      "title": "Canonical passport fields display with missing field indicators",
-      "description": "As a supplier, I can view extracted canonical fields for a batch and clearly see which fields are missing.",
-      "acceptanceCriteria": [
-        "Clicking a batch on /supplier/batches navigates to /supplier/batches/[id]",
-        "Detail page shows all five canonical fields: product_name, material, origin_country, supplier_name, sustainability_notes",
-        "Populated fields show their extracted value",
-        "Missing fields are visibly marked (e.g., red label, dash, or 'Missing' badge)",
-        "If status is missing_information, a summary list of missing field names is shown at the top",
-        "Page works with all three seed batches",
-        "npm run typecheck passes",
-        "npm run lint passes"
-      ],
-      "priority": 6,
-      "passes": true,
-      "notes": "Route at /supplier/batches/[id]. Shows 5 canonical fields with Missing badge for nulls. Missing fields summary at top when status is missing_information."
+      "passes": false
     }
   ]
 }

@@ -7,6 +7,8 @@ Started: Fri May 16 2026
 - SQLite/LibSQL via Prisma does not support `String[]` - use `Json @default("[]")` for array fields
 - Tests needing PrismaClient must use `// @vitest-environment node` and import `dotenv/config`
 - Vitest global setup is jsdom - node-specific tests need per-file environment override
+- SQLite cannot handle concurrent writes: integration tests that only VERIFY seed data should query only (no re-seed), to avoid lock contention when running in parallel with seed-batches.test.ts
+- `fileParallelism: false` in vitest.config.ts breaks jsdom environment tests - do not use it; instead write read-only query tests
 
 ---
 
@@ -55,4 +57,28 @@ Started: Fri May 16 2026
 - Created `/supplier/batches/[id]` - shows 5 canonical fields, Missing badge for nulls, missing summary at top
 - Files changed: src/app/supplier/batches/[id]/page.tsx
 - **Learnings:** Next.js 16 dynamic params are a Promise - must `await params` before accessing id
+---
+
+## 2026-05-16 - US-DPP-001
+- Changed erpSyncedBatch passport passportUrl from external Bosch URL to `/passport/BAT-BSH-PT625-2024-008314`
+- Added `passportUrl` key to erpPayloadJson for erpSyncedBatch
+- Changed missingBatch passportUrl to `/passport/BAT-BSH-PT500-2024-008315`
+- Created `src/tests/seed-passport-url.test.ts` - 2 query-only tests (no re-seed to avoid SQLite lock)
+- Files changed: prisma/seed-helpers.ts, src/tests/seed-passport-url.test.ts
+- **Learnings for future iterations:**
+  - Vitest runs test files in parallel by default; SQLite can't handle concurrent writes - write verification tests as read-only queries
+  - `fileParallelism: false` in vitest.config.ts breaks jsdom environment for React component tests - avoid it
+  - seed-batches.test.ts is the canonical seeder in the test suite; other DB tests should query not re-seed
+---
+
+## 2026-05-16 - US-DPP-002
+- Created src/lib/retailer/buildRetailerPassport.ts: pure function + RetailerPassportView type
+- 5 positive flags, 5 negative flags (total 10); overallGrade from carbonFootprintPerformanceClassValue
+- 5 categories: carbon, recycled, performance, compliance, origin; each with 2+ data points
+- src/tests/buildRetailerPassport.test.ts: 6 Vitest tests (all unit, no DB)
+- Files changed: src/lib/retailer/buildRetailerPassport.ts, src/tests/buildRetailerPassport.test.ts
+- **Learnings for future iterations:**
+  - buildRetailerPassport tests are pure unit tests (no DB, no env override needed)
+  - BatteryPassportData from @prisma/client is the input type - import directly
+  - renewableContentShare is a string field (not null/number) - check for empty string too
 ---
