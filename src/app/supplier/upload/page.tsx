@@ -14,21 +14,21 @@ const EXTRACTION_STEPS = [
 ];
 
 const EXTRACTED_PASSPORT = {
-  passportId: 'BAT-BSH-PT625-2024-008314',
+  passportId: 'BAT-BSH-PT625-2026-008314',
   passportType: 'BATTERY',
   readinessScore: 100,
   identification: {
-    uniqueBatteryIdentifier: 'BAT-BSH-PT625-2024-008314',
+    uniqueBatteryIdentifier: 'BAT-BSH-PT625-2026-008314',
     batteryCategory: 'LMT',
     batteryModel: 'Bosch PowerTube 625 Wh',
     batteryChemistry: 'Lithium-Nickel-Manganese-Cobalt Oxide (NMC622)',
     manufacturerName: 'Robert Bosch GmbH',
-    manufactureYear: 2024,
+    manufactureYear: 2026,
     placeOfManufacture: 'Samsung SDI Automotive Battery Plant',
     batteryWeight: '2.9 kg',
     grossCapacityKwh: 0.625,
-    issueDate: '2024-06-01',
-    declarationOfConformityRef: 'BSH-BAT-2024-EU-003142',
+    issueDate: '2026-06-01',
+    declarationOfConformityRef: 'BSH-BAT-2026-EU-003142',
     qrCodeAffixed: true,
   },
   carbonFootprint: {
@@ -64,7 +64,7 @@ const EXTRACTED_PASSPORT = {
     auditReport: 'RMI Conformant Smelter Program',
   },
   conformity: {
-    euDeclarationRef: 'BSH-BAT-2024-EU-003142',
+    euDeclarationRef: 'BSH-BAT-2026-EU-003142',
     ceMarking: 'CE marking affixed',
     testReport: 'IEC 62133-2:2017 passed',
     notifiedBodyRef: '0044 (TÜV SÜD Product Service GmbH)',
@@ -89,7 +89,7 @@ export default function SupplierUploadPage() {
     setActiveStep(0);
     setCompletedSteps([]);
 
-    const stepDuration = 500;
+    const stepDuration = 2000;
     EXTRACTION_STEPS.forEach((_, i) => {
       const t1 = setTimeout(() => setActiveStep(i), i * stepDuration);
       const t2 = setTimeout(() => setCompletedSteps((prev) => [...prev, i]), i * stepDuration + stepDuration - 80);
@@ -124,7 +124,7 @@ export default function SupplierUploadPage() {
           </header>
 
           {stage === 'idle' && (
-            <div className="rounded-2xl border border-white bg-white/60 p-8 shadow-2xl backdrop-blur-xl relative group">
+            <div className="rounded-2xl border border-white/60 bg-gradient-to-br from-white/80 to-white/40 p-8 backdrop-blur-xl relative group">
               <div className="absolute -inset-px bg-gradient-to-br from-emerald-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
               <form onSubmit={handleSubmit} className="space-y-6 relative">
                 <div className="space-y-2">
@@ -156,7 +156,7 @@ export default function SupplierUploadPage() {
                       id="orderNumber"
                       name="orderNumber"
                       type="text"
-                      defaultValue="ORD-KTM-BSH-2024"
+                      defaultValue="ORD-KTM-BSH-2026"
                       className="w-full rounded-xl border border-slate-200 bg-white/50 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 transition-all shadow-sm"
                     />
                   </div>
@@ -186,7 +186,7 @@ export default function SupplierUploadPage() {
                       multiple
                       accept=".csv,.json,.xlsx,.xml,.pdf,.txt"
                       onChange={(e) => setFileName(e.target.files?.[0]?.name ?? null)}
-                      className="w-full rounded-xl border border-dashed border-slate-300 bg-slate-50/50 px-4 py-8 text-sm text-slate-400 file:hidden cursor-pointer hover:bg-white transition-all text-center shadow-sm"
+                      className="w-full rounded-xl border border-dashed border-slate-300 bg-slate-50/50 px-4 py-8 text-sm text-transparent file:hidden cursor-pointer hover:bg-white transition-all text-center shadow-sm"
                     />
                     <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none py-8">
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-3 shadow-sm transition-all ${fileName ? 'bg-emerald-100 text-emerald-600' : 'bg-emerald-50 text-emerald-600 group-hover/file:scale-110'}`}>
@@ -209,7 +209,7 @@ export default function SupplierUploadPage() {
 
                 <button
                   type="submit"
-                  className="w-full group relative flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-6 py-4 text-sm font-bold text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 hover:shadow-emerald-500/30 transition-all"
+                  className="w-full group relative flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-6 py-4 text-sm font-bold text-white hover:bg-emerald-600 transition-all"
                 >
                   <span>Initialize AI Extraction</span>
                   <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
@@ -219,7 +219,7 @@ export default function SupplierUploadPage() {
           )}
 
           {stage === 'extracting' && (
-            <div className="rounded-2xl border border-white bg-white/60 p-10 shadow-2xl backdrop-blur-xl relative overflow-hidden">
+            <div className="rounded-2xl border border-white/60 bg-gradient-to-br from-white/80 to-white/40 p-10 backdrop-blur-xl relative overflow-hidden">
               <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-emerald-400/10 animate-ping" style={{ animationDuration: '2s' }} />
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full bg-emerald-400/10 animate-ping" style={{ animationDuration: '1.5s', animationDelay: '0.3s' }} />
@@ -227,7 +227,7 @@ export default function SupplierUploadPage() {
 
               <div className="relative flex flex-col items-center text-center mb-10">
                 <div className="relative mb-6">
-                  <div className="w-20 h-20 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center shadow-lg">
+                  <div className="w-20 h-20 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center">
                     <Zap size={32} className="text-emerald-600 animate-pulse" />
                   </div>
                   <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 animate-ping" />
@@ -292,14 +292,14 @@ export default function SupplierUploadPage() {
 
           {stage === 'extracted' && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-6 shadow-xl backdrop-blur-xl flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/30 flex-shrink-0">
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-6 backdrop-blur-xl flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-emerald-500 flex items-center justify-center text-white flex-shrink-0">
                   <CheckCircle size={24} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-700 mb-0.5">Extraction Complete</p>
                   <h2 className="text-xl font-bold text-slate-900">Bosch PowerTube 625 Wh</h2>
-                  <p className="text-xs text-slate-500">Passport ID: <span className="font-mono text-slate-700">BAT-BSH-PT625-2024-008314</span></p>
+                  <p className="text-xs text-slate-500">Passport ID: <span className="font-mono text-slate-700">BAT-BSH-PT625-2026-008314</span></p>
                 </div>
                 <div className="flex-shrink-0 text-right">
                   <div className="text-3xl font-black text-emerald-600">100%</div>
@@ -314,14 +314,14 @@ export default function SupplierUploadPage() {
                   { label: 'Carbon Class', value: 'Class C' },
                   { label: 'CO₂e/kWh', value: '148 kg' },
                 ].map((stat) => (
-                  <div key={stat.label} className="rounded-xl border border-white bg-white/60 p-4 shadow-sm backdrop-blur-xl text-center">
+                  <div key={stat.label} className="rounded-xl border border-white/60 bg-gradient-to-br from-white/80 to-white/40 p-4 shadow-sm backdrop-blur-xl text-center">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">{stat.label}</p>
                     <p className="text-base font-bold text-slate-900">{stat.value}</p>
                   </div>
                 ))}
               </div>
 
-              <div className="rounded-2xl border border-white bg-white/60 shadow-2xl backdrop-blur-xl overflow-hidden">
+              <div className="rounded-2xl border border-white/60 bg-gradient-to-br from-white/80 to-white/40 shadow-[0_2px_16px_rgba(0,0,0,0.06)] backdrop-blur-xl overflow-hidden">
                 <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/50">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-red-400" />
@@ -340,10 +340,10 @@ export default function SupplierUploadPage() {
 
               <button
                 onClick={() => router.push('/supplier/batches')}
-                className="w-full group relative flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-6 py-4 text-sm font-bold text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 hover:shadow-emerald-500/30 transition-all"
+                className="w-full group relative flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-6 py-4 text-sm font-bold text-white hover:bg-emerald-600 transition-all"
               >
                 <CheckCircle size={16} />
-                <span>Confirm &amp; Submit to ERP</span>
+                <span>Confirm &amp; Submit</span>
                 <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
               </button>
             </div>

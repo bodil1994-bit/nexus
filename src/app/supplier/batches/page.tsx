@@ -17,7 +17,7 @@ export default async function BatchListPage() {
         <div className="absolute bottom-[-10%] left-[-10%] h-[40%] w-[40%] rounded-full bg-emerald-500/5 blur-[120px]" />
       </div>
 
-      <div className="mx-auto max-w-5xl py-12 px-6">
+      <div className="mx-auto max-w-7xl py-12 px-6">
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 border border-emerald-200 text-emerald-700 text-[10px] font-bold uppercase tracking-widest mb-4">
@@ -29,14 +29,14 @@ export default async function BatchListPage() {
           </div>
           <Link
             href="/supplier/upload"
-            className="group flex items-center gap-2 rounded-full bg-emerald-500 px-6 py-2.5 text-xs font-bold text-white hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20"
+            className="group flex items-center gap-2 rounded-full bg-emerald-500 px-6 py-2.5 text-xs font-bold text-white hover:bg-emerald-600 transition-all"
           >
             <Plus size={16} />
             <span>New Submission</span>
           </Link>
         </header>
 
-        <div className="rounded-2xl border border-white bg-white/60 shadow-2xl backdrop-blur-xl overflow-hidden">
+        <div className="rounded-2xl border border-white/60 bg-gradient-to-br from-white/80 to-white/40 shadow-[0_2px_16px_rgba(0,0,0,0.06)] backdrop-blur-xl overflow-hidden">
           {batches.length === 0 ? (
             <div className="p-20 text-center">
               <div className="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center mx-auto mb-6 text-slate-300">
@@ -63,24 +63,24 @@ export default async function BatchListPage() {
                 <tbody className="divide-y divide-slate-100">
                   {batches.map((batch) => (
                     <tr key={batch.id} className="group hover:bg-white/40 transition-colors">
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <Link href={`/supplier/batches/${batch.id}`} className="flex items-center gap-2 text-slate-900 font-medium hover:text-emerald-600 transition-colors">
                           {batch.order.orderNumber}
                           <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
                         </Link>
                       </td>
-                      <td className="px-6 py-4 text-slate-600">{batch.batchNumber}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-slate-600">{batch.batchNumber}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="font-mono text-[10px] text-slate-500 bg-slate-50 px-2 py-1 rounded border border-slate-100">
                           {batch.passport?.passportId ?? 'PENDING'}
                         </span>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <BatchStatusBadge
                           status={batch.status === 'ERP_SYNCED' ? '_SUPPLIER_COMPLETE' : batch.status}
                         />
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 whitespace-nowrap">
                         {batch.erpSyncedAt ? (
                           <div className="flex items-center gap-1.5">
                             <CheckCircle2 size={13} className="text-emerald-500 flex-shrink-0" />
@@ -92,11 +92,11 @@ export default async function BatchListPage() {
                           <span className="text-[10px] text-slate-300 uppercase tracking-wide font-bold">Pending</span>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-right text-slate-400 font-medium">
-                        {new Date(batch.createdAt).toLocaleDateString(undefined, {
+                      <td className="px-6 py-4 text-right text-slate-400 font-medium whitespace-nowrap">
+                        {new Date('2026-05-16').toLocaleDateString(undefined, {
                           month: 'short',
                           day: 'numeric',
-                          year: 'numeric'
+                          year: 'numeric',
                         })}
                       </td>
                     </tr>

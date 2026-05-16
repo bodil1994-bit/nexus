@@ -13,7 +13,7 @@ export default function Home() {
       {/* Header */}
       <header className="flex items-center justify-between px-8 py-6 max-w-7xl mx-auto w-full">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+          <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center">
             <span className="text-white font-bold text-xl leading-none">v</span>
           </div>
           <span className="text-2xl font-semibold tracking-tight">veloport</span>
@@ -61,7 +61,7 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <Link
               href="/supplier/upload"
-              className="group flex h-14 items-center justify-center gap-2 rounded-full bg-emerald-500 px-8 text-white font-semibold shadow-lg shadow-emerald-500/30 transition-all hover:bg-emerald-600 hover:scale-105"
+              className="group flex h-14 items-center justify-center gap-2 rounded-full bg-emerald-500 px-8 text-white font-semibold transition-all hover:bg-emerald-600 hover:scale-105"
             >
               Get started
               <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
@@ -85,7 +85,7 @@ export default function Home() {
             },
             {
               icon: <ShieldCheck className="text-emerald-600" />,
-              title: "Compliance Ready",
+              title: "Compliant Batches",
               desc: "Automatically validate against EU Battery Regulation requirements and identify missing critical information."
             },
             {
@@ -94,7 +94,7 @@ export default function Home() {
               desc: "Score suppliers on carbon footprint, recycled content, and due diligence performance from real passport data."
             }
           ].map((feature, i) => (
-            <div key={i} className="rounded-2xl border border-white bg-white/60 p-8 shadow-xl backdrop-blur-xl hover:border-emerald-200 transition-colors group">
+            <div key={i} className="rounded-2xl border border-white/60 bg-gradient-to-br from-white/80 to-white/40 p-8 backdrop-blur-xl hover:border-emerald-200 transition-colors group">
               <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 {feature.icon}
               </div>

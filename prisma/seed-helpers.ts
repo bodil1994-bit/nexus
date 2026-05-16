@@ -26,7 +26,7 @@ export async function seedSupplierBatches(prisma: PrismaClient) {
 
   const order = await prisma.order.create({
     data: {
-      orderNumber: 'ORD-KTM-BSH-2024',
+      orderNumber: 'ORD-KTM-BSH-2026',
       supplierId: supplier.id,
       manufacturerId: manufacturer.id,
     },
@@ -42,17 +42,17 @@ export async function seedSupplierBatches(prisma: PrismaClient) {
       readinessScore: 100,
       erpSyncedAt: new Date('2026-05-16T18:18:00.000Z'),
       erpPayloadJson: JSON.stringify({
-        orderNumber: 'ORD-KTM-BSH-2024',
+        orderNumber: 'ORD-KTM-BSH-2026',
         batchNumber: 'BAT-BSH-PT625-002',
-        passportReferenceId: 'BAT-BSH-PT625-2024-008314',
-        passportUrl: '/passport/BAT-BSH-PT625-2024-008314',
+        passportReferenceId: 'BAT-BSH-PT625-2026-008314',
+        passportUrl: '/passport/BAT-BSH-PT625-2026-008314',
       }),
     },
   });
 
   const missingBatch = await prisma.batch.create({
     data: {
-      batchNumber: 'BAT-BSH-PT500-003',
+      batchNumber: 'BAT-BSH-PT500-001',
       orderId: order.id,
       manufacturerSku: 'BPT500-KTM',
       quantity: 200,
@@ -63,32 +63,32 @@ export async function seedSupplierBatches(prisma: PrismaClient) {
         'carbonFootprintKgCo2ePerKwh',
         'declarationOfConformityRef',
       ]),
-      supplierNotifiedAt: new Date('2024-06-18T10:15:00.000Z'),
+      supplierNotifiedAt: new Date('2026-06-18T10:15:00.000Z'),
     },
   });
 
   const passport = await prisma.digitalProductPassport.create({
     data: {
-      passportId: 'BAT-BSH-PT625-2024-008314',
+      passportId: 'BAT-BSH-PT625-2026-008314',
       passportType: 'BATTERY',
-      passportUrl: '/passport/BAT-BSH-PT625-2024-008314',
+      passportUrl: '/passport/BAT-BSH-PT625-2026-008314',
       batchId: erpSyncedBatch.id,
     },
   });
 
   await prisma.digitalProductPassport.create({
     data: {
-      passportId: 'BAT-BSH-PT500-2024-008315',
+      passportId: 'BAT-BSH-PT500-2026-008315',
       passportType: 'BATTERY',
-      passportUrl: '/passport/BAT-BSH-PT500-2024-008315',
+      passportUrl: '/passport/BAT-BSH-PT500-2026-008315',
       batchId: missingBatch.id,
       batteryData: {
         create: {
-          uniqueBatteryIdentifier: 'BAT-BSH-PT500-2024-008315',
+          uniqueBatteryIdentifier: 'BAT-BSH-PT500-2026-008315',
           batteryModel: 'Bosch PowerTube 500 Wh',
           batteryChemistry: 'Lithium-Nickel-Manganese-Cobalt Oxide (NMC622)',
           manufacturerName: 'Robert Bosch GmbH',
-          manufactureYear: 2024,
+          manufactureYear: 2026,
         },
       },
     },
@@ -99,25 +99,25 @@ export async function seedSupplierBatches(prisma: PrismaClient) {
       passportDbId: passport.id,
 
       // Section M — Identification
-      uniqueBatteryIdentifier: 'BAT-BSH-PT625-2024-008314',
+      uniqueBatteryIdentifier: 'BAT-BSH-PT625-2026-008314',
       batteryCategory: 'LMT',
       batteryModel: 'Bosch PowerTube 625 Wh',
       batteryChemistry: 'Lithium-Nickel-Manganese-Cobalt Oxide (NMC622)',
       manufacturerName: 'Robert Bosch GmbH',
-      manufactureYear: 2024,
+      manufactureYear: 2026,
       grossCapacityKwh: 0.625,
       carbonFootprintKgCo2ePerKwh: 148,
       recycledCobaltPercentage: 0,
       recycledLithiumPercentage: 0,
-      declarationOfConformityRef: 'BSH-BAT-2024-EU-003142',
+      declarationOfConformityRef: 'BSH-BAT-2026-EU-003142',
       qrCodeAffixed: true,
-      qrCodeUrl: 'https://bat-passport.bosch.com/BAT-BSH-PT625-2024-008314',
-      issueDate: '2024-06-01',
+      qrCodeUrl: 'https://bat-passport.bosch.com/BAT-BSH-PT625-2026-008314',
+      issueDate: '2026-06-01',
 
       // Section A — General Info
       manufacturerIdentification: 'Robert Bosch GmbH',
       placeOfManufacture: 'Samsung SDI Automotive Battery Plant',
-      dateOfManufacture: '2024',
+      dateOfManufacture: '2026',
       batteryWeight: '2.9 kg',
       ratedCapacity: '0.625 kWh',
       chemicalComposition: 'Lithium-Nickel-Manganese-Cobalt Oxide (NMC)',
@@ -151,9 +151,9 @@ export async function seedSupplierBatches(prisma: PrismaClient) {
       carbonFootprintLifecycleDistributionPct: 4,
       carbonFootprintLifecycleEndOfLifeKgCo2e: -16.7,
       carbonFootprintLifecycleEndOfLifePct: -18,
-      carbonDeclarationDocReferenceNumber: 'BSH-BAT-2024-EU-003142',
+      carbonDeclarationDocReferenceNumber: 'BSH-BAT-2026-EU-003142',
       carbonDeclarationDocIssuedBy: 'Robert Bosch GmbH — eBike Systems',
-      carbonDeclarationDocIssueDate: '2024-06-01',
+      carbonDeclarationDocIssueDate: '2026-06-01',
       carbonDeclarationDocNotifiedBodyReference: '0044 (TÜV SÜD Product Service GmbH)',
       carbonDeclarationSustainabilityPageUrl: 'www.bosch-ebike.com/sustainability',
       carbonDeclarationCarbonFootprintReportUrl: 'www.bosch-ebike.com/assets/lca-powertube-625.pdf',
@@ -167,7 +167,7 @@ export async function seedSupplierBatches(prisma: PrismaClient) {
 
       // Section D — Due Diligence
       dueDiligenceStrategy: 'Bosch Supplier Code of Conduct',
-      dueDiligenceReport: 'Bosch Sustainability Report 2024',
+      dueDiligenceReport: 'Bosch Sustainability Report 2026',
       dueDiligenceVerificationSummary: 'Verified by KPMG AG',
       supplyChainRawMaterialDescription: 'Cobalt Sulphate (CoSO4·7H2O)',
       supplyChainCountryOfOrigin: 'DRC',
@@ -195,8 +195,8 @@ export async function seedSupplierBatches(prisma: PrismaClient) {
       cRateCycleLifeTest: '0.5C discharge',
 
       // Section F — Conformity & Waste
-      euDeclarationOfConformity: 'BSH-BAT-2024-EU-003142',
-      docReferenceNumber: 'BSH-BAT-2024-EU-003142',
+      euDeclarationOfConformity: 'BSH-BAT-2026-EU-003142',
+      docReferenceNumber: 'BSH-BAT-2026-EU-003142',
       ceMarking: 'CE marking affixed',
       labellingRequirements: 'Separate collection symbol',
       cadmiumMarking: '0% Cadmium',
@@ -209,7 +209,7 @@ export async function seedSupplierBatches(prisma: PrismaClient) {
       wasteInfoHazardousSubstanceImpacts: 'Cobalt aquatic toxicity',
 
       // Section M — Identification (continued)
-      individualBatteryIdentifier: 'BAT-BSH-PT625-2024-008314',
+      individualBatteryIdentifier: 'BAT-BSH-PT625-2026-008314',
       qrCode: 'QR code affixed',
       operatingInstructionsReference: 'www.bosch-ebike.com/powertube-625-manual',
       previousBatteryPassportLink: 'No predecessor',
@@ -246,7 +246,7 @@ export async function seedSupplierBatches(prisma: PrismaClient) {
       sohRemainingRoundTripEfficiency: '91.5%',
       sohSelfDischargeRate: '2.5%/month',
       sohOhmicResistance: '120 mΩ',
-      lifetimeManufactureAndCommissioningDate: '2024-06-15',
+      lifetimeManufactureAndCommissioningDate: '2026-06-15',
       lifetimeEnergyThroughput: '0 kWh',
       lifetimeCapacityThroughput: '0 Ah',
       lifetimeDeepDischarges: '0',

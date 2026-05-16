@@ -22,7 +22,7 @@ export function MissingFieldsList({ missingFields, supplierEmail, supplierNotifi
       <ul className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-4">
         {missingFields.map((field) => (
           <li key={field} className="flex items-center gap-2 text-sm text-amber-700 font-medium">
-            <div className="w-1.5 h-1.5 rounded-full bg-amber-500 shadow-sm shadow-amber-500/20" />
+            <div className="w-1.5 h-1.5 rounded-full bg-amber-500 shadow-sm" />
             {FIELD_LABELS[field] ?? field}
           </li>
         ))}

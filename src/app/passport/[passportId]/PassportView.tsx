@@ -163,7 +163,7 @@ function BikeScreen({ data, onBatteryClick }: { data: RetailerPassportView; onBa
   return (
     <div>
       <header className="flex items-center gap-2 mb-6">
-        <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+        <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center">
           <span className="text-white font-bold text-xl leading-none">v</span>
         </div>
         <span className="text-2xl font-semibold tracking-tight text-slate-900">veloport</span>
@@ -378,7 +378,7 @@ function BatteryScreen({ data, onBack }: { data: RetailerPassportView; onBack: (
                   className="w-full px-4 py-3 flex items-center gap-3"
                   onClick={() => setExpandedId(isOpen ? null : cat.id)}
                 >
-                  <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center flex-shrink-0">
                     {CAT_ICONS[cat.id] ?? <span className="text-slate-400 text-sm">•</span>}
                   </div>
                   <div className="flex-1 text-left min-w-0">
@@ -426,7 +426,7 @@ function BatteryScreen({ data, onBack }: { data: RetailerPassportView; onBack: (
             </div>
             <span className="text-sm font-semibold text-slate-300">veloport</span>
           </div>
-          <span className="text-[10px] text-slate-500">Passport v1.0 · 2024</span>
+          <span className="text-[10px] text-slate-500">Passport v1.0 · 2026</span>
         </div>
       </section>
     </div>

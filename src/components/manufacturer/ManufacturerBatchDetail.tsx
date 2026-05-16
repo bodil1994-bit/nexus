@@ -30,7 +30,7 @@ export function ManufacturerBatchDetail({ order, batch, onClose }: Props) {
   const batteryData = batch.passport?.batteryData as Record<string, unknown> | null | undefined;
 
   return (
-    <div className="mt-8 overflow-hidden rounded-2xl border border-white bg-white/70 shadow-2xl backdrop-blur-xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="mt-8 overflow-hidden rounded-2xl border border-white/60 bg-gradient-to-br from-white/85 to-white/50 shadow-[0_2px_16px_rgba(0,0,0,0.06)] backdrop-blur-xl animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-slate-100 px-8 py-5 bg-white/50">
         <div className="flex items-center gap-4">
@@ -162,7 +162,7 @@ export function ManufacturerBatchDetail({ order, batch, onClose }: Props) {
                 href={batch.passport.passportUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-600 transition-colors shadow-sm shadow-emerald-500/20"
+                className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-600 transition-colors shadow-sm"
               >
                 View Customer Passport
                 <ExternalLink size={14} />

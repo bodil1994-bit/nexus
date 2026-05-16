@@ -42,7 +42,7 @@ export default async function BatchDetailPage({ params }: { params: Promise<{ id
           </Link>
         </div>
 
-        <div className="rounded-2xl border border-white bg-white/60 shadow-2xl backdrop-blur-xl p-8 lg:p-12 overflow-hidden relative">
+        <div className="rounded-2xl border border-white/60 bg-gradient-to-br from-white/80 to-white/40 shadow-[0_2px_16px_rgba(0,0,0,0.06)] backdrop-blur-xl p-8 lg:p-12 overflow-hidden relative">
           <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
              <Activity size={120} className="text-emerald-600" />
           </div>
