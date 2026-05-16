@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { BatchStatusBadge } from '@/components/manufacturer/BatchStatusBadge';
-import { History, Plus, ChevronRight } from 'lucide-react';
+import { History, Plus, ChevronRight, CheckCircle2 } from 'lucide-react';
 
 export default async function BatchListPage() {
   const batches = await prisma.batch.findMany({
@@ -56,6 +56,7 @@ export default async function BatchListPage() {
                     <th className="px-6 py-4 text-left font-semibold text-slate-500">Batch Serial</th>
                     <th className="px-6 py-4 text-left font-semibold text-slate-500">Passport ID</th>
                     <th className="px-6 py-4 text-left font-semibold text-slate-500">Status</th>
+                    <th className="px-6 py-4 text-left font-semibold text-slate-500">ERP Sync</th>
                     <th className="px-6 py-4 text-right font-semibold text-slate-500">Submitted</th>
                   </tr>
                 </thead>
@@ -76,6 +77,18 @@ export default async function BatchListPage() {
                       </td>
                       <td className="px-6 py-4">
                         <BatchStatusBadge status={batch.status} />
+                      </td>
+                      <td className="px-6 py-4">
+                        {batch.erpSyncedAt ? (
+                          <div className="flex items-center gap-1.5">
+                            <CheckCircle2 size={13} className="text-emerald-500 flex-shrink-0" />
+                            <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wide">
+                              {new Date(batch.erpSyncedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-[10px] text-slate-300 uppercase tracking-wide font-bold">Pending</span>
+                        )}
                       </td>
                       <td className="px-6 py-4 text-right text-slate-400 font-medium">
                         {new Date(batch.createdAt).toLocaleDateString(undefined, {

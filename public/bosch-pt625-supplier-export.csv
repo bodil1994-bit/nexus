@@ -1,0 +1,56 @@
+## BOSCH EBIKE SYSTEMS - SUPPLIER DATA EXPORT
+## Generated: 2024-06-01T07:14:33Z  Source: SAP MM Module  Export ref: BSH-EXP-20240601-004
+## WARNING: Raw export - not formatted for external use
+
+FIELD,VALUE,UNIT,NOTES
+product_ref,BPT625-KTM,,internal sku mapping
+product_name,Bosch PowerTube 625 Wh,,
+part_no,1270020919,,SAP part number
+order_ref,ORD-KTM-BSH-2024,,
+batch_serial,BAT-BSH-PT625-002,,
+qty_shipped,300,pcs,
+chemistry_type,NMC622,,Li-Nickel-Manganese-Cobalt
+nominal_voltage,36,V,
+max_voltage,42,V,
+min_voltage,30,V,
+capacity_kwh,0.625,kWh,
+capacity_ah,17.5,Ah,
+weight_kg,2.9,kg,incl housing
+peak_power,900,W,discharge
+cycle_life,500,cycles,to 60% SoH
+temp_range_storage,-20|+60,°C,
+temp_range_operation,0|+40,°C,
+round_trip_eff_initial,91.5,%,
+internal_res_pack,120,mΩ,
+cell_config,10S2P,,
+mfg_plant,Samsung SDI Automotive Battery Plant - Cheonan,,
+mfg_date,2024,,year only in this export
+mfg_country,KR,,ISO 3166 - cell level
+assembly_country,DE,,Blaichach Bavaria
+supplier_name,Robert Bosch GmbH,,
+supplier_id,BOSCH-DE-001,,
+supplier_contact,ebike-supply@bosch.com,,
+carbon_gco2e_kwh,148000,gCO2e/kWh,=148 kg basis
+carbon_scope,cradle-to-gate,,ISO 14067
+carbon_class,C,,EU preliminary
+recycled_cobalt_pct,0,%,
+recycled_lithium_pct,0,%,
+recycled_nickel_pct,0,%,
+renewable_energy_share,55,%,mfg facility
+cobalt_origin,DRC,,conflict mineral flag
+cobalt_smelter,Samsung SDI Co. Ltd.,,RMI conformant
+conformity_ref,BSH-BAT-2024-EU-003142,,
+ce_marking,YES,,
+notified_body,0044 - TÜV SÜD Product Service GmbH,,
+test_standard,IEC 62133-2:2017,,
+hazardous_substance,LiPF6 (lithium hexafluorophosphate),,
+fire_agent,Water,,
+separate_collection,YES,,WEEE
+qr_affixed,YES,,
+qr_url,https://bat-passport.bosch.com/BAT-BSH-PT625-2024-008314,,
+takeback_url,www.bosch-ebike.com/dealer-finder,,
+manual_url,www.bosch-ebike.com/powertube-625-manual,,
+sustainability_url,www.bosch-ebike.com/sustainability,,
+lca_report_url,www.bosch-ebike.com/assets/lca-powertube-625.pdf,,
+
+## END OF EXPORT - 46 fields - checksum: A3F9C2
