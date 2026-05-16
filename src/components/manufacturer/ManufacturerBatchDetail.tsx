@@ -4,6 +4,7 @@ import { MissingFieldsList } from './MissingFieldsList';
 import { ErpPayloadPreview } from './ErpPayloadPreview';
 import { BatchActions } from './BatchActions';
 import type { OrderRow, BatchRow } from './ManufacturerBatchTable';
+import { X, Info, Database, FileText, Activity } from 'lucide-react';
 
 type Props = {
   order: OrderRow;
@@ -20,7 +21,7 @@ const PASSPORT_DATA_FIELDS: [string, string][] = [
   ['carbonFootprintKgCo2ePerKwh', 'Carbon Footprint (kg CO2e/kWh)'],
   ['recycledCobaltPercentage', 'Recycled Cobalt (%)'],
   ['recycledLithiumPercentage', 'Recycled Lithium (%)'],
-  ['declarationOfConformityRef', 'Declaration of Conformity Reference'],
+  ['declarationOfConformityRef', 'Compliance Ref'],
   ['qrCodeAffixed', 'QR Code Affixed'],
 ];
 
@@ -29,114 +30,161 @@ export function ManufacturerBatchDetail({ order, batch, onClose }: Props) {
   const batteryData = batch.passport?.batteryData as Record<string, unknown> | null | undefined;
 
   return (
-    <div className="mt-6 rounded-xl border border-zinc-200 bg-white shadow-sm">
-      <div className="flex items-center justify-between border-b border-zinc-200 px-6 py-4">
-        <h2 className="text-base font-semibold text-zinc-900">Batch Detail</h2>
+    <div className="mt-8 overflow-hidden rounded-2xl border border-white bg-white/70 shadow-2xl backdrop-blur-xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+      {/* Header */}
+      <div className="flex items-center justify-between border-b border-slate-100 px-8 py-5 bg-white/50">
+        <div className="flex items-center gap-4">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 shadow-sm">
+            <Activity size={20} />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-slate-900">Batch Analysis</h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Order <span className="text-slate-900 font-mono font-medium">#{order.orderNumber}</span> • Batch <span className="text-slate-900 font-mono font-medium">#{batch.batchNumber}</span>
+            </p>
+          </div>
+        </div>
         <button
           onClick={onClose}
-          className="text-sm text-zinc-500 hover:text-zinc-700"
+          className="rounded-full w-8 h-8 flex items-center justify-center bg-white border border-slate-200 text-slate-400 hover:text-slate-900 transition-colors shadow-sm"
         >
-          Close
+          <X size={18} />
         </button>
       </div>
 
-      <div className="space-y-6 px-6 py-4">
-        <section>
-          <h3 className="mb-3 text-sm font-medium text-zinc-700">Batch Summary</h3>
-          <dl className="grid grid-cols-2 gap-3 text-sm">
-            <div>
-              <dt className="text-zinc-500">Order</dt>
-              <dd className="text-zinc-900">{order.orderNumber}</dd>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 divide-y lg:divide-y-0 lg:divide-x divide-slate-100">
+        {/* Main Content Area */}
+        <div className="lg:col-span-2 p-8 space-y-10">
+          
+          {/* Summary Grid */}
+          <section>
+            <div className="flex items-center gap-2 mb-6">
+              <Info size={16} className="text-emerald-600" />
+              <h3 className="text-sm font-bold uppercase tracking-wider text-emerald-700/70">Batch Summary</h3>
             </div>
-            <div>
-              <dt className="text-zinc-500">Supplier</dt>
-              <dd className="text-zinc-900">{order.supplier.name}</dd>
-            </div>
-            <div>
-              <dt className="text-zinc-500">Batch</dt>
-              <dd className="text-zinc-900">{batch.batchNumber}</dd>
-            </div>
-            <div>
-              <dt className="text-zinc-500">SKU</dt>
-              <dd className="text-zinc-900">{batch.manufacturerSku}</dd>
-            </div>
-            <div>
-              <dt className="text-zinc-500">Quantity</dt>
-              <dd className="text-zinc-900">{batch.quantity}</dd>
-            </div>
-            <div>
-              <dt className="text-zinc-500">Status</dt>
-              <dd>
-                <BatchStatusBadge status={batch.status} />
-              </dd>
-            </div>
-            <div>
-              <dt className="text-zinc-500">Passport ID</dt>
-              <dd className="text-zinc-900">{batch.passport?.passportId ?? '—'}</dd>
-            </div>
-            <div>
-              <dt className="text-zinc-500">Readiness Score</dt>
-              <dd className="text-zinc-900">{batch.readinessScore}%</dd>
-            </div>
-            {batch.passport?.passportUrl && (
-              <div className="col-span-2">
-                <dt className="text-zinc-500">Passport URL</dt>
-                <dd className="break-all text-zinc-900">{batch.passport.passportUrl}</dd>
+            <dl className="grid grid-cols-2 md:grid-cols-3 gap-6 text-sm">
+              <div className="space-y-1">
+                <dt className="text-slate-400 font-medium">Supplier</dt>
+                <dd className="text-slate-900 font-medium">{order.supplier.name}</dd>
               </div>
-            )}
-          </dl>
-        </section>
-
-        <section className="border-t border-zinc-100 pt-6">
-          <h3 className="mb-3 text-sm font-medium text-zinc-700">Missing Information</h3>
-          <MissingFieldsList
-            missingFields={missingFields}
-            supplierEmail={order.supplier.email}
-            supplierNotifiedAt={batch.supplierNotifiedAt}
-          />
-        </section>
-
-        <section className="border-t border-zinc-100 pt-6">
-          <h3 className="mb-3 text-sm font-medium text-zinc-700">ERP Sync</h3>
-          <ErpPayloadPreview
-            status={batch.status}
-            erpSyncedAt={batch.erpSyncedAt}
-            erpPayloadJson={batch.erpPayloadJson}
-            orderNumber={order.orderNumber}
-            batchNumber={batch.batchNumber}
-            passportReferenceId={batch.passport?.passportId}
-          />
-        </section>
-
-        {batteryData && (
-          <section className="border-t border-zinc-100 pt-6">
-            <h3 className="mb-3 text-sm font-medium text-zinc-700">Passport Data</h3>
-            <dl className="grid grid-cols-2 gap-3 text-sm">
-              {PASSPORT_DATA_FIELDS.map(([key, label]) => (
-                <div key={key}>
-                  <dt className="text-zinc-500">{label}</dt>
-                  <dd className="text-zinc-900">
-                    {batteryData[key] != null ? String(batteryData[key]) : '—'}
-                  </dd>
-                </div>
-              ))}
+              <div className="space-y-1">
+                <dt className="text-slate-400 font-medium">Manufacturer SKU</dt>
+                <dd className="text-slate-900 font-mono">{batch.manufacturerSku}</dd>
+              </div>
+              <div className="space-y-1">
+                <dt className="text-slate-400 font-medium">Quantity</dt>
+                <dd className="text-slate-900 font-medium">{batch.quantity} units</dd>
+              </div>
+              <div className="space-y-1">
+                <dt className="text-slate-400 font-medium">Passport ID</dt>
+                <dd className="text-slate-900 font-mono">{batch.passport?.passportId ?? 'PENDING'}</dd>
+              </div>
+              <div className="space-y-1">
+                <dt className="text-slate-400 font-medium">Readiness</dt>
+                <dd className="text-slate-900 font-bold">{batch.readinessScore}%</dd>
+              </div>
+              <div className="space-y-1">
+                <dt className="text-slate-400 font-medium">Status</dt>
+                <dd><BatchStatusBadge status={batch.status} /></dd>
+              </div>
             </dl>
           </section>
-        )}
 
-        <section className="border-t border-zinc-100 pt-6">
-          <h3 className="mb-3 text-sm font-medium text-zinc-700">Actions</h3>
-          <BatchActions
-            batchId={batch.id}
-            status={batch.status}
-            supplierNotifiedAt={batch.supplierNotifiedAt}
-            erpPayloadJson={batch.erpPayloadJson}
-            orderNumber={order.orderNumber}
-            batchNumber={batch.batchNumber}
-            passportReferenceId={batch.passport?.passportId}
-          />
-        </section>
+          {/* Missing Information Section */}
+          <section className="space-y-4">
+            <div className="flex items-center gap-2 mb-2">
+              <AlertCircle size={16} className="text-amber-600" />
+              <h3 className="text-sm font-bold uppercase tracking-wider text-amber-700/70">Missing Information</h3>
+            </div>
+            <div className="rounded-xl border border-slate-100 bg-white/40 p-6 shadow-sm">
+              <MissingFieldsList
+                missingFields={missingFields}
+                supplierEmail={order.supplier.email}
+                supplierNotifiedAt={batch.supplierNotifiedAt}
+              />
+            </div>
+          </section>
+
+          {/* Passport Data Section */}
+          {batteryData && (
+            <section className="space-y-6">
+              <div className="flex items-center gap-2">
+                <FileText size={16} className="text-emerald-600" />
+                <h3 className="text-sm font-bold uppercase tracking-wider text-emerald-700/70">Extracted Passport Data</h3>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-y-6 gap-x-4 text-sm bg-slate-50/50 rounded-xl border border-slate-100 p-6">
+                {PASSPORT_DATA_FIELDS.map(([key, label]) => (
+                  <div key={key} className="space-y-1">
+                    <dt className="text-slate-400 font-medium">{label}</dt>
+                    <dd className="text-slate-700">
+                      {batteryData[key] != null ? String(batteryData[key]) : '—'}
+                    </dd>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
+
+        {/* Sidebar Actions Area */}
+        <div className="p-8 bg-slate-50/30 space-y-10">
+          <section className="space-y-4">
+            <div className="flex items-center gap-2 mb-6">
+              <Database size={16} className="text-emerald-600" />
+              <h3 className="text-sm font-bold uppercase tracking-wider text-emerald-700/70">ERP Integration</h3>
+            </div>
+            <ErpPayloadPreview
+              status={batch.status}
+              erpSyncedAt={batch.erpSyncedAt}
+              erpPayloadJson={batch.erpPayloadJson}
+              orderNumber={order.orderNumber}
+              batchNumber={batch.batchNumber}
+              passportReferenceId={batch.passport?.passportId}
+            />
+          </section>
+
+          <section className="pt-6 border-t border-slate-100 space-y-4">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400">Available Actions</h3>
+            <BatchActions
+              batchId={batch.id}
+              status={batch.status}
+              supplierNotifiedAt={batch.supplierNotifiedAt}
+              erpPayloadJson={batch.erpPayloadJson}
+              orderNumber={order.orderNumber}
+              batchNumber={batch.batchNumber}
+              passportReferenceId={batch.passport?.passportId}
+            />
+          </section>
+          
+          {batch.passport?.passportUrl && (
+            <div className="pt-6 border-t border-slate-100">
+               <dt className="text-slate-400 text-[10px] uppercase font-bold tracking-widest mb-2">Internal Passport URL</dt>
+               <dd className="break-all text-[10px] font-mono text-slate-500 bg-slate-100/50 p-3 rounded border border-slate-200/50">
+                 {batch.passport.passportUrl}
+               </dd>
+            </div>
+          )}
+        </div>
       </div>
     </div>
+  );
+}
+
+function AlertCircle({ size, className }: { size: number, className: string }) {
+  return (
+    <svg 
+      xmlns="http://www.w3.org/2000/svg" 
+      width={size} 
+      height={size} 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      stroke="currentColor" 
+      strokeWidth="2" 
+      strokeLinecap="round" 
+      strokeLinejoin="round" 
+      className={className}
+    >
+      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
   );
 }

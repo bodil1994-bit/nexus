@@ -20,7 +20,8 @@ const MOCK_VALUES: Record<string, string> = {
   sustainability_notes: 'Certified carbon-neutral manufacturing',
 };
 
-export function mockExtract(_: string): ExtractionResult {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function mockExtract(_filename: string): ExtractionResult {
   const isComplete = Math.random() < 0.5;
 
   if (isComplete) {

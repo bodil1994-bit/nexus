@@ -79,7 +79,7 @@ export async function submitBatch(formData: FormData) {
         create: {
           passportId: passportReferenceId,
           passportType: 'BATTERY',
-          passportUrl: `https://passport.nexus.local/${passportReferenceId}`,
+          passportUrl: `https://passport.veloport.local/${passportReferenceId}`,
           batteryData: {
             create: {
               uniqueBatteryIdentifier: passportReferenceId,

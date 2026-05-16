@@ -1,4 +1,4 @@
-# Nexus - Beginner Setup Guide
+# Veloport - Beginner Setup Guide
 
 This guide is written for people with little or no development experience.
 Follow it top-to-bottom and copy/paste commands exactly.
@@ -163,7 +163,7 @@ npm run dev
 
 1. Open http://localhost:3000
 2. Click **Supplier Upload**
-3. Select a manufacturer from the dropdown (KTM, Fisher, or Giro)
+3. Select a manufacturer from the dropdown (KTM Sportmotorcycle GmbH, Fisher, or Giro)
 4. Enter an order number, e.g. `ORD-9001`
 5. Enter a batch number, e.g. `BAT-100`
 6. Attach the sample file below and click **Submit Batch**

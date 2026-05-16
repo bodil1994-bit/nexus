@@ -1,14 +1,7 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
-
-const STATUS_STYLES: Record<string, string> = {
-  PROCESSING: 'bg-yellow-100 text-yellow-800',
-  COMPLETE: 'bg-green-100 text-green-800',
-  INCOMPLETE: 'bg-red-100 text-red-800',
-  processing: 'bg-yellow-100 text-yellow-800',
-  complete: 'bg-green-100 text-green-800',
-  missing_information: 'bg-red-100 text-red-800',
-};
+import { BatchStatusBadge } from '@/components/manufacturer/BatchStatusBadge';
+import { History, Plus, ChevronRight } from 'lucide-react';
 
 export default async function BatchListPage() {
   const batches = await prisma.batch.findMany({
@@ -17,57 +10,85 @@ export default async function BatchListPage() {
   });
 
   return (
-    <div className="min-h-screen bg-zinc-50 py-12 px-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold text-zinc-900">Batches</h1>
+    <div className="min-h-screen bg-slate-50 text-slate-900 relative overflow-hidden selection:bg-emerald-100">
+      {/* Background Glows */}
+      <div className="fixed top-0 left-0 -z-10 h-full w-full overflow-hidden">
+        <div className="absolute top-[-10%] right-[-10%] h-[40%] w-[40%] rounded-full bg-emerald-500/5 blur-[120px]" />
+        <div className="absolute bottom-[-10%] left-[-10%] h-[40%] w-[40%] rounded-full bg-emerald-500/5 blur-[120px]" />
+      </div>
+
+      <div className="mx-auto max-w-5xl py-12 px-6">
+        <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 border border-emerald-200 text-emerald-700 text-[10px] font-bold uppercase tracking-widest mb-4">
+              <History size={12} />
+              <span>Submission Archive</span>
+            </div>
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900">Your Batches</h1>
+            <p className="text-slate-500 mt-1">Review and track your battery passport submissions.</p>
+          </div>
           <Link
             href="/supplier/upload"
-            className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 transition-colors"
+            className="group flex items-center gap-2 rounded-full bg-emerald-500 px-6 py-2.5 text-xs font-bold text-white hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20"
           >
-            New Batch
+            <Plus size={16} />
+            <span>New Submission</span>
           </Link>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm border border-zinc-200 overflow-hidden">
+        </header>
+
+        <div className="rounded-2xl border border-white bg-white/60 shadow-2xl backdrop-blur-xl overflow-hidden">
           {batches.length === 0 ? (
-            <p className="p-8 text-center text-zinc-400 text-sm">No batches yet.</p>
+            <div className="p-20 text-center">
+              <div className="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center mx-auto mb-6 text-slate-300">
+                <History size={32} />
+              </div>
+              <p className="text-slate-500 font-medium">No submission history found.</p>
+              <Link href="/supplier/upload" className="text-emerald-600 text-sm mt-4 inline-block hover:underline">
+                Upload your first batch passport →
+              </Link>
+            </div>
           ) : (
-            <table className="w-full text-sm">
-              <thead className="border-b border-zinc-100 bg-zinc-50">
-                <tr>
-                  <th className="px-4 py-3 text-left font-medium text-zinc-500">Order</th>
-                  <th className="px-4 py-3 text-left font-medium text-zinc-500">Batch</th>
-                  <th className="px-4 py-3 text-left font-medium text-zinc-500">Passport ID</th>
-                  <th className="px-4 py-3 text-left font-medium text-zinc-500">Status</th>
-                  <th className="px-4 py-3 text-left font-medium text-zinc-500">Created</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-100">
-                {batches.map((batch) => (
-                  <tr key={batch.id} className="hover:bg-zinc-50 transition-colors">
-                    <td className="px-4 py-3 text-zinc-700">
-                      <Link href={`/supplier/batches/${batch.id}`} className="hover:underline">
-                        {batch.order.orderNumber}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-3 text-zinc-700">{batch.batchNumber}</td>
-                    <td className="px-4 py-3 font-mono text-xs text-zinc-600">
-                      {batch.passport?.passportId ?? '—'}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_STYLES[batch.status] ?? 'bg-zinc-100 text-zinc-700'}`}
-                      >
-                        {batch.status.replace('_', ' ').toLowerCase()}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-zinc-500">
-                      {new Date(batch.createdAt).toLocaleDateString()}
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="border-b border-slate-100 bg-slate-50/50">
+                  <tr>
+                    <th className="px-6 py-4 text-left font-semibold text-slate-500">Order Reference</th>
+                    <th className="px-6 py-4 text-left font-semibold text-slate-500">Batch Serial</th>
+                    <th className="px-6 py-4 text-left font-semibold text-slate-500">Passport ID</th>
+                    <th className="px-6 py-4 text-left font-semibold text-slate-500">Status</th>
+                    <th className="px-6 py-4 text-right font-semibold text-slate-500">Submitted</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {batches.map((batch) => (
+                    <tr key={batch.id} className="group hover:bg-white/40 transition-colors">
+                      <td className="px-6 py-4">
+                        <Link href={`/supplier/batches/${batch.id}`} className="flex items-center gap-2 text-slate-900 font-medium hover:text-emerald-600 transition-colors">
+                          {batch.order.orderNumber}
+                          <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </Link>
+                      </td>
+                      <td className="px-6 py-4 text-slate-600">{batch.batchNumber}</td>
+                      <td className="px-6 py-4">
+                        <span className="font-mono text-[10px] text-slate-500 bg-slate-50 px-2 py-1 rounded border border-slate-100">
+                          {batch.passport?.passportId ?? 'PENDING'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <BatchStatusBadge status={batch.status} />
+                      </td>
+                      <td className="px-6 py-4 text-right text-slate-400 font-medium">
+                        {new Date(batch.createdAt).toLocaleDateString(undefined, {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric'
+                        })}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       </div>

@@ -17,16 +17,16 @@ export async function seedSupplierBatches(prisma: PrismaClient) {
   await prisma.manufacturer.deleteMany();
 
   const supplier = await prisma.supplier.create({
-    data: { name: 'Samsung SDI Co., Ltd.', email: 'battery-supply@samsungsdi.example' },
+    data: { name: 'Robert Bosch GmbH', email: 'ebike@bosch.com' },
   });
 
   const manufacturer = await prisma.manufacturer.create({
-    data: { name: 'Robert Bosch GmbH' },
+    data: { name: 'KTM Sportmotorcycle GmbH' },
   });
 
   const order = await prisma.order.create({
     data: {
-      orderNumber: 'ORD-BSH-2024-0441',
+      orderNumber: 'ORD-KTM-BSH-2024',
       supplierId: supplier.id,
       manufacturerId: manufacturer.id,
     },
@@ -34,9 +34,9 @@ export async function seedSupplierBatches(prisma: PrismaClient) {
 
   const processingBatch = await prisma.batch.create({
     data: {
-      batchNumber: 'BAT-PT625-001',
+      batchNumber: 'BAT-BSH-PT625-001',
       orderId: order.id,
-      manufacturerSku: 'BPT625',
+      manufacturerSku: 'BPT625-KTM',
       quantity: 500,
       status: 'PROCESSING',
       readinessScore: 40,
@@ -45,16 +45,16 @@ export async function seedSupplierBatches(prisma: PrismaClient) {
 
   const erpSyncedBatch = await prisma.batch.create({
     data: {
-      batchNumber: 'BAT-PT625-002',
+      batchNumber: 'BAT-BSH-PT625-002',
       orderId: order.id,
-      manufacturerSku: 'BPT625',
+      manufacturerSku: 'BPT625-KTM',
       quantity: 300,
       status: 'ERP_SYNCED',
       readinessScore: 100,
       erpSyncedAt: new Date('2024-06-18T09:30:00.000Z'),
       erpPayloadJson: JSON.stringify({
-        orderNumber: 'ORD-BSH-2024-0441',
-        batchNumber: 'BAT-PT625-002',
+        orderNumber: 'ORD-KTM-BSH-2024',
+        batchNumber: 'BAT-BSH-PT625-002',
         passportReferenceId: 'BAT-BSH-PT625-2024-008314',
       }),
     },
@@ -62,9 +62,9 @@ export async function seedSupplierBatches(prisma: PrismaClient) {
 
   const missingBatch = await prisma.batch.create({
     data: {
-      batchNumber: 'BAT-PT500-003',
+      batchNumber: 'BAT-BSH-PT500-003',
       orderId: order.id,
-      manufacturerSku: 'BPT500',
+      manufacturerSku: 'BPT500-KTM',
       quantity: 200,
       status: 'INCOMPLETE',
       readinessScore: 68,
@@ -142,16 +142,14 @@ export async function seedSupplierBatches(prisma: PrismaClient) {
       carbonFootprintPerformanceClassValue: 'C',
       carbonFootprintPerformanceClassStatus: 'preliminary',
       carbonDeclarationManufacturerCompanyName: 'Robert Bosch GmbH',
-      carbonDeclarationManufacturerAddress:
-        'Robert-Bosch-Platz 1, 70839 Gerlingen, Germany',
+      carbonDeclarationManufacturerAddress: 'Robert-Bosch-Platz 1, 70839 Gerlingen, Germany',
       carbonDeclarationManufacturerSustainabilityUrl: 'www.bosch.com/sustainability',
       carbonDeclarationBatteryModelName: 'Bosch PowerTube 625 Wh',
       carbonDeclarationBatteryModelChemistry: 'NMC622',
       carbonDeclarationBatteryModelNominalCapacityAh: 17.5,
       carbonDeclarationBatteryModelNominalCapacityKwh: 0.625,
       carbonDeclarationBatteryModelNominalVoltageV: 36,
-      carbonDeclarationBatteryModelApplication:
-        'E-bike (pedelec / speed pedelec) — integrated frame battery',
+      carbonDeclarationBatteryModelApplication: 'E-bike (pedelec / speed pedelec) — integrated frame battery',
       carbonDeclarationManufacturingFacilityName: 'Bosch eBike Systems Manufacturing',
       carbonDeclarationManufacturingCity: 'Blaichach, Bavaria',
       carbonDeclarationManufacturingCountry: 'Germany',
@@ -168,8 +166,7 @@ export async function seedSupplierBatches(prisma: PrismaClient) {
       carbonDeclarationDocIssueDate: '2024-06-01',
       carbonDeclarationDocNotifiedBodyReference: '0044 (TÜV SÜD Product Service GmbH)',
       carbonDeclarationSustainabilityPageUrl: 'www.bosch-ebike.com/sustainability',
-      carbonDeclarationCarbonFootprintReportUrl:
-        'www.bosch-ebike.com/assets/lca-powertube-625.pdf',
+      carbonDeclarationCarbonFootprintReportUrl: 'www.bosch-ebike.com/assets/lca-powertube-625.pdf',
 
       // Section C — Recycled Content
       recycledContentCobalt: '0%',
@@ -247,7 +244,7 @@ export async function seedSupplierBatches(prisma: PrismaClient) {
       technicalDocumentationStandards: 'IEC 62133-2:2017',
       technicalDocumentationGeneralDescription: 'Bosch PowerTube 625 Wh Li-ion LMT Battery',
 
-      // Section I-L — Individual Battery (as-new state at manufacture)
+      // Section I-L — Individual Battery
       individualRatedCapacityAndFade: '17.5 Ah',
       individualPowerAndFade: '900 W',
       individualInternalResistance: '120 mΩ',

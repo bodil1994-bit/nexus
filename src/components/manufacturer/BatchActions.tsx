@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Sparkles, Download, FileJson, AlertCircle, Clock } from 'lucide-react';
 
 type Props = {
   batchId: string;
@@ -25,24 +26,35 @@ export function BatchActions({
 
   if (status === 'INCOMPLETE') {
     return (
-      <div className="space-y-3">
-        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
-          <p className="text-sm font-medium text-amber-800">Enrichment unavailable</p>
-          <p className="mt-1 text-sm text-amber-700">
-            Enrichment unavailable until passport data is complete enough.
+      <div className="space-y-4">
+        <div className="rounded-xl border border-slate-100 bg-white p-4 opacity-50 cursor-not-allowed group shadow-sm">
+          <div className="flex items-center gap-2 mb-2 text-slate-400">
+            <Sparkles size={16} />
+            <p className="text-sm font-bold uppercase tracking-wider">Enrichment</p>
+          </div>
+          <p className="text-xs text-slate-500">
+            Enrichment unavailable until passport data is complete.
           </p>
         </div>
-        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
-          <p className="text-sm font-medium text-amber-800">Retailer export unavailable</p>
-          <p className="mt-1 text-sm text-amber-700">
-            Retailer export unavailable until passport data is complete enough.
+        
+        <div className="rounded-xl border border-slate-100 bg-white p-4 opacity-50 cursor-not-allowed shadow-sm">
+          <div className="flex items-center gap-2 mb-2 text-slate-400">
+            <Download size={16} />
+            <p className="text-sm font-bold uppercase tracking-wider">Retailer export</p>
+          </div>
+          <p className="text-xs text-slate-500">
+            Export unavailable until passport data is complete.
           </p>
         </div>
-        <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4">
-          <p className="text-sm text-zinc-600">ERP sync blocked.</p>
-          {supplierNotifiedAt && (
-            <p className="mt-1 text-sm text-zinc-500">Data requested from supplier.</p>
-          )}
+
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 flex items-start gap-3 shadow-sm">
+          <AlertCircle size={16} className="text-amber-600 mt-0.5" />
+          <div>
+             <p className="text-xs font-bold text-amber-700 uppercase tracking-tight">Sync Blocked</p>
+             {supplierNotifiedAt && (
+               <p className="text-[10px] text-amber-600/80 mt-1">Information request sent to supplier.</p>
+             )}
+          </div>
         </div>
       </div>
     );
@@ -50,21 +62,15 @@ export function BatchActions({
 
   if (status === 'PROCESSING') {
     return (
-      <div className="space-y-3">
-        <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4">
-          <p className="text-sm text-zinc-600">ERP sync pending processing result.</p>
+      <div className="space-y-4">
+        <div className="rounded-xl border border-slate-200 bg-white p-4 flex items-center gap-3 shadow-sm">
+          <Clock size={16} className="text-slate-400" />
+          <p className="text-xs font-medium text-slate-500">Sync pending processing...</p>
         </div>
-        <div className="rounded-lg border border-zinc-100 bg-zinc-50 p-4 opacity-50">
-          <p className="text-sm font-medium text-zinc-500">Enrichment</p>
-          <p className="mt-1 text-xs text-zinc-400">
-            Available once processing is complete.
-          </p>
-        </div>
-        <div className="rounded-lg border border-zinc-100 bg-zinc-50 p-4 opacity-50">
-          <p className="text-sm font-medium text-zinc-500">Retailer export</p>
-          <p className="mt-1 text-xs text-zinc-400">
-            Available once processing is complete.
-          </p>
+        
+        <div className="rounded-xl border border-slate-100 bg-white p-4 opacity-50 shadow-sm">
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Enrichment</p>
+          <p className="text-[10px] text-slate-500">Available after processing.</p>
         </div>
       </div>
     );
@@ -77,58 +83,57 @@ export function BatchActions({
     } catch {
       erpPreview = {};
     }
-    const payload = {
+    const finalPayload = {
       orderNumber: erpPreview.orderNumber ?? orderNumber,
       batchNumber: erpPreview.batchNumber ?? batchNumber,
       passportReferenceId: erpPreview.passportReferenceId ?? passportReferenceId ?? null,
     };
 
     return (
-      <div className="space-y-3">
-        <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4">
-          <p className="mb-3 text-sm font-medium text-zinc-700">Enrichment</p>
-          <p className="mb-3 text-xs text-zinc-500">
-            Provides an enriched view of the battery passport data with computed scores and
-            regulatory references. This endpoint is not yet live.
-          </p>
+      <div className="space-y-4">
+        <div className="space-y-2">
           <a
             href={`/api/batches/${batchId}/enrichment`}
-            className="inline-flex items-center rounded-md bg-zinc-800 px-3 py-1.5 text-xs font-medium text-white hover:bg-zinc-700"
+            className="flex items-center justify-between w-full rounded-xl bg-emerald-50 border border-emerald-100 p-4 text-emerald-700 hover:bg-emerald-100 transition-all group shadow-sm"
           >
-            View enrichment
+            <div className="flex items-center gap-3">
+              <Sparkles size={18} />
+              <div className="text-left">
+                <p className="text-xs font-bold uppercase tracking-wider">View Enrichment</p>
+                <p className="text-[10px] opacity-70">AI-powered insights</p>
+              </div>
+            </div>
           </a>
-        </div>
 
-        <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4">
-          <p className="mb-3 text-sm font-medium text-zinc-700">Retailer export</p>
-          <p className="mb-3 text-xs text-zinc-500">
-            Exports a retailer-facing passport summary suitable for product listing and
-            compliance documentation. This endpoint is not yet live.
-          </p>
           <a
             href={`/api/batches/${batchId}/retailer-passport`}
-            className="inline-flex items-center rounded-md bg-zinc-800 px-3 py-1.5 text-xs font-medium text-white hover:bg-zinc-700"
+            className="flex items-center justify-between w-full rounded-xl bg-white border border-slate-200 p-4 text-slate-700 hover:bg-slate-50 transition-all shadow-sm"
           >
-            Retailer export
+            <div className="flex items-center gap-3">
+              <Download size={18} className="text-slate-400" />
+              <div className="text-left">
+                <p className="text-xs font-bold uppercase tracking-wider">Retailer Export</p>
+                <p className="text-[10px] text-slate-500">Generate compliance PDF</p>
+              </div>
+            </div>
           </a>
         </div>
 
-        <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-zinc-700">ERP payload</p>
-            <button
-              onClick={() => setShowErpPayload((v) => !v)}
-              className="text-xs text-zinc-500 hover:text-zinc-700"
-            >
-              {showErpPayload ? 'Hide' : 'View ERP payload'}
-            </button>
+        <button
+          onClick={() => setShowErpPayload((v) => !v)}
+          className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-slate-900 transition-colors pl-1"
+        >
+          <FileJson size={14} />
+          {showErpPayload ? 'Hide ERP Payload' : 'View ERP Payload'}
+        </button>
+
+        {showErpPayload && (
+          <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 animate-in fade-in zoom-in-95 duration-200 shadow-inner">
+             <pre className="text-[10px] font-mono text-emerald-700/80 leading-relaxed overflow-x-auto">
+               {JSON.stringify(finalPayload, null, 2)}
+             </pre>
           </div>
-          {showErpPayload && (
-            <pre className="mt-3 overflow-x-auto rounded-md border border-zinc-200 bg-white p-3 text-xs text-zinc-700">
-              {JSON.stringify(payload, null, 2)}
-            </pre>
-          )}
-        </div>
+        )}
       </div>
     );
   }
