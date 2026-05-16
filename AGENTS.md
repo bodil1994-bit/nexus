@@ -1,5 +1,25 @@
-<!-- BEGIN:nextjs-agent-rules -->
-# This is NOT the Next.js you know
+# Agent Best Practices
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
-<!-- END:nextjs-agent-rules -->
+## Operating Context
+- This repository is a Next.js 16 app with React 19, Prisma 7, Tailwind CSS 4, and Vitest.
+- Treat framework behavior as version-sensitive. Before changing Next.js-specific APIs, routing, metadata, rendering, server actions, or build behavior, read the relevant local guide in `node_modules/next/dist/docs/`.
+- Use the installed docs and project files as the source of truth over older conventions or assumptions.
+
+## Engineering Practices
+- Keep changes small, focused, and aligned with the current product direction in `docs/PRD.md`.
+- Preserve consistency between UI flows, Prisma schema, migrations, seed data, and tests.
+- Prefer typed, explicit code paths over implicit framework magic when the behavior affects data or compliance workflows.
+- Avoid introducing new dependencies unless the value is clear and the existing stack cannot reasonably solve the problem.
+- Do not overwrite unrelated local changes. Inspect the working tree before broad edits.
+
+## Validation
+- Run the narrowest useful validation after edits.
+- Use `npm run typecheck` for TypeScript changes.
+- Use `npm run lint` for lint-sensitive changes.
+- Use `npm test` for behavior or component changes.
+- Use Prisma migration and seed commands when database schema or seed data changes.
+
+## Documentation
+- Keep this file limited to durable agent guidance and best practices.
+- Keep product requirements, user flows, scope, and acceptance criteria in `docs/PRD.md`.
+- Keep beginner setup and operational commands in `README.md`.
