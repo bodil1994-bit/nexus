@@ -32,17 +32,6 @@ export async function seedSupplierBatches(prisma: PrismaClient) {
     },
   });
 
-  const processingBatch = await prisma.batch.create({
-    data: {
-      batchNumber: 'BAT-BSH-PT625-001',
-      orderId: order.id,
-      manufacturerSku: 'BPT625-KTM',
-      quantity: 500,
-      status: 'PROCESSING',
-      readinessScore: 40,
-    },
-  });
-
   const erpSyncedBatch = await prisma.batch.create({
     data: {
       batchNumber: 'BAT-BSH-PT625-002',
@@ -271,5 +260,5 @@ export async function seedSupplierBatches(prisma: PrismaClient) {
     },
   });
 
-  return { processingBatch, erpSyncedBatch, missingBatch };
+  return { erpSyncedBatch, missingBatch };
 }
