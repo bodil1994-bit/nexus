@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { calculateDashboardStats } from '@/lib/manufacturer/dashboardStats';
 import { ManufacturerKpiCards } from './ManufacturerKpiCards';
 import { ManufacturerBatchTable, type OrderRow } from './ManufacturerBatchTable';
+import { ManufacturerBatchDetail } from './ManufacturerBatchDetail';
 
 export function ManufacturerDashboard() {
   const [orders, setOrders] = useState<OrderRow[] | null>(null);
@@ -65,9 +66,18 @@ export function ManufacturerDashboard() {
               orders={orders}
               onSelectBatch={setSelectedBatchId}
             />
-            {selectedBatchId && (
-              <p className="mt-4 text-xs text-zinc-400">Selected: {selectedBatchId}</p>
-            )}
+            {selectedBatchId && (() => {
+              const entry = orders
+                .flatMap((o) => o.batches.map((b) => ({ order: o, batch: b })))
+                .find(({ batch }) => batch.id === selectedBatchId);
+              return entry ? (
+                <ManufacturerBatchDetail
+                  order={entry.order}
+                  batch={entry.batch}
+                  onClose={() => setSelectedBatchId(null)}
+                />
+              ) : null;
+            })()}
           </>
         )}
       </div>
