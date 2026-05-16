@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -33,6 +34,20 @@ export default function Home() {
             </a>{" "}
             center.
           </p>
+        </div>
+        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
+          <Link
+            className="flex h-12 w-full items-center justify-center rounded-full bg-zinc-900 px-5 text-white transition-colors hover:bg-zinc-700 md:w-auto"
+            href="/supplier/upload"
+          >
+            Supplier Upload
+          </Link>
+          <Link
+            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-zinc-300 px-5 text-zinc-900 transition-colors hover:bg-zinc-100 md:w-auto"
+            href="/supplier/batches"
+          >
+            View Batches
+          </Link>
         </div>
         <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
           <a
