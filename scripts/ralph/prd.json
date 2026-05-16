@@ -1,0 +1,115 @@
+{
+  "project": "Nexus",
+  "branchName": "supplier-batch-passport-upload",
+  "description": "Supplier batch passport upload workflow - supplier creates batches, uploads files, sees extraction status and missing fields.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Prisma schema: Batch and PassportDocument models",
+      "description": "As a developer, I need DB models for batches and passport documents so the workflow has persistent storage.",
+      "acceptanceCriteria": [
+        "Add Batch model with fields: id, orderNumber, batchNumber, status (processing|complete|missing_information), createdAt, updatedAt",
+        "Add PassportDocument model with fields: id, batchId (FK), filename, extractedFields (Json), missingFields (String[]), createdAt",
+        "Generate and apply Prisma migration",
+        "Write a Vitest unit test that imports the Prisma client and asserts Batch and PassportDocument models exist (check prisma.batch and prisma.passportDocument are defined)",
+        "npm test passes",
+        "npm run typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Added createdAt/updatedAt to Batch, added PassportDocument model with Json fields (SQLite has no String[]). Migration 20260516133923 applied."
+    },
+    {
+      "id": "US-002",
+      "title": "Seed data: one batch per status",
+      "description": "As a developer, I need seed data covering all three statuses so the UI can be tested and demonstrated without uploads.",
+      "acceptanceCriteria": [
+        "Seed creates exactly three batches: one with status processing, one complete, one missing_information",
+        "Each batch has at least one PassportDocument with mocked extractedFields (product_name, material, origin_country, supplier_name, sustainability_notes)",
+        "The missing_information batch has at least two fields in missingFields",
+        "The complete batch has all five canonical fields populated",
+        "npx prisma db seed runs without error",
+        "Write a Vitest test that runs the seed logic (or imports seed helpers) and asserts exactly three batches exist with statuses: processing, complete, missing_information",
+        "npm test passes",
+        "npm run typecheck passes"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "seedSupplierBatches helper exported from prisma/seed-helpers.ts. 4 integration tests pass."
+    },
+    {
+      "id": "US-003",
+      "title": "Supplier upload page: form UI",
+      "description": "As a supplier, I can open an upload page and fill in order number, batch number, and attach passport files.",
+      "acceptanceCriteria": [
+        "Route exists at /supplier/upload",
+        "Form has text input for order number",
+        "Form has text input for batch number",
+        "Form has file input accepting .csv, .json, .xlsx, .xml, .pdf, .txt (multiple files allowed)",
+        "Submit button is present",
+        "Page is navigable from app root or has a link from the home page",
+        "npm run typecheck passes",
+        "npm run lint passes"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Route at /supplier/upload. Form with orderNumber, batchNumber, multi-file input. Nav links on home page."
+    },
+    {
+      "id": "US-004",
+      "title": "Batch creation with mock extraction",
+      "description": "As a supplier, submitting the upload form creates a batch and runs mock extraction so I get results without real AI.",
+      "acceptanceCriteria": [
+        "Form submission calls a server action or API route",
+        "Server action creates a Batch record with status processing initially",
+        "Mock extraction runs synchronously: randomly assigns complete or missing_information status",
+        "Creates a PassportDocument with mocked extractedFields for each uploaded file",
+        "Missing_information batches have at least one entry in missingFields",
+        "After submission, user is redirected to /supplier/batches or sees success feedback",
+        "Write Vitest unit tests for the mock extraction function: (1) returns status complete or missing_information, (2) always returns all five canonical field keys in extractedFields, (3) missing_information result has non-empty missingFields array",
+        "npm test passes",
+        "npm run typecheck passes",
+        "npm run lint passes"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "submitBatch server action in src/app/supplier/upload/actions.ts. mockExtract in src/lib/mock-extraction.ts. Redirects to /supplier/batches."
+    },
+    {
+      "id": "US-005",
+      "title": "Batch list with status badges",
+      "description": "As a supplier, I can see all my batches and their processing status at a glance.",
+      "acceptanceCriteria": [
+        "Route exists at /supplier/batches",
+        "Lists all batches ordered by createdAt descending",
+        "Each row shows: order number, batch number, status badge, created date",
+        "Status badge colors: processing=yellow, complete=green, missing_information=red",
+        "Link or button from /supplier/batches to /supplier/upload",
+        "Page works with seed data (shows three batches)",
+        "npm run typecheck passes",
+        "npm run lint passes"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "Route at /supplier/batches. Table with order, batch, status badge (yellow/green/red), created date. Link to /supplier/upload."
+    },
+    {
+      "id": "US-006",
+      "title": "Canonical passport fields display with missing field indicators",
+      "description": "As a supplier, I can view extracted canonical fields for a batch and clearly see which fields are missing.",
+      "acceptanceCriteria": [
+        "Clicking a batch on /supplier/batches navigates to /supplier/batches/[id]",
+        "Detail page shows all five canonical fields: product_name, material, origin_country, supplier_name, sustainability_notes",
+        "Populated fields show their extracted value",
+        "Missing fields are visibly marked (e.g., red label, dash, or 'Missing' badge)",
+        "If status is missing_information, a summary list of missing field names is shown at the top",
+        "Page works with all three seed batches",
+        "npm run typecheck passes",
+        "npm run lint passes"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "Route at /supplier/batches/[id]. Shows 5 canonical fields with Missing badge for nulls. Missing fields summary at top when status is missing_information."
+    }
+  ]
+}

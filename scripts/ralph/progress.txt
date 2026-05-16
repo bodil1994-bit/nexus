@@ -1,0 +1,58 @@
+# Ralph Progress Log
+Started: Fri May 16 2026
+---
+
+## Codebase Patterns
+- Prisma uses `@prisma/adapter-libsql` (PrismaLibSql) - always pass adapter when constructing PrismaClient
+- SQLite/LibSQL via Prisma does not support `String[]` - use `Json @default("[]")` for array fields
+- Tests needing PrismaClient must use `// @vitest-environment node` and import `dotenv/config`
+- Vitest global setup is jsdom - node-specific tests need per-file environment override
+
+---
+
+## 2026-05-16 - US-001
+- Added `createdAt DateTime @default(now())` and `updatedAt DateTime @updatedAt` to existing `Batch` model
+- Added `PassportDocument` model: id, batchId (FK), filename, extractedFields (Json), missingFields (Json), createdAt
+- Added `passportDocuments PassportDocument[]` back-relation on Batch
+- Applied migration: `20260516133923_add_batch_timestamps_passport_document`
+- Created `src/tests/prisma-models.test.ts` - Vitest node-env smoke test
+- Files changed: prisma/schema.prisma, prisma/migrations/.../migration.sql, src/tests/prisma-models.test.ts
+- **Learnings for future iterations:**
+  - PrismaClient requires adapter: `new PrismaClient({ adapter: new PrismaLibSql({ url: ... }) })`
+  - `missingFields String[]` became `missingFields Json @default("[]")` - SQLite limitation
+  - Existing Batch model already had orderId relation (no direct orderNumber field) - later UI stories need to include order relation
+---
+
+## 2026-05-16 - US-002
+- Refactored seed into exportable `seedSupplierBatches(prisma)` in `prisma/seed-helpers.ts`
+- Creates 3 batches: processing (BAT-001), complete (BAT-002), missing_information (BAT-003)
+- Each batch has one PassportDocument with mocked extractedFields
+- complete batch: all 5 canonical fields populated; missing_information: 3 fields missing
+- Created `src/tests/seed-batches.test.ts` - 4 integration tests
+- Files changed: prisma/seed.ts, prisma/seed-helpers.ts, src/tests/seed-batches.test.ts
+- **Learnings:** Export seed helpers for testability; integration tests use afterAll to disconnect
+
+## 2026-05-16 - US-003
+- Created `/supplier/upload` route at `src/app/supplier/upload/page.tsx`
+- Form: orderNumber (text), batchNumber (text), files (multi-file, .csv/.json/.xlsx/.xml/.pdf/.txt), submit button
+- Added Supplier Upload + View Batches nav links to home page
+- Files changed: src/app/supplier/upload/page.tsx, src/app/page.tsx
+- **Learnings:** Next.js 16 App Router: form action= takes server action ref, encType needed for file uploads
+
+## 2026-05-16 - US-004
+- Created `src/lib/mock-extraction.ts` - `mockExtract(filename)` returns random complete/missing_information
+- Created `src/lib/prisma.ts` - global PrismaClient singleton with libsql adapter
+- Created `src/app/supplier/upload/actions.ts` - `submitBatch` server action
+- 3 Vitest unit tests for mock extraction contract
+- Files changed: 5 files
+- **Learnings:** `_: string` still triggers no-unused-vars warning (exit 0); server actions file input: use FormData.getAll('files') as File[]
+
+## 2026-05-16 - US-005
+- Created `/supplier/batches` - async server component, status badges, links to detail and upload
+- Files changed: src/app/supplier/batches/page.tsx
+
+## 2026-05-16 - US-006
+- Created `/supplier/batches/[id]` - shows 5 canonical fields, Missing badge for nulls, missing summary at top
+- Files changed: src/app/supplier/batches/[id]/page.tsx
+- **Learnings:** Next.js 16 dynamic params are a Promise - must `await params` before accessing id
+---
