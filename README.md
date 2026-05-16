@@ -117,6 +117,95 @@ Reset database completely (deletes data, then re-runs migrations):
 npm run db:reset
 ```
 
+## 7.1) Graphify for AI usage
+
+Graphify is installed globally for your user account.
+
+Binary location:
+
+```bash
+~/Library/Python/3.14/bin/graphify
+```
+
+Add it to your shell PATH (so `graphify` works directly):
+
+```bash
+echo 'export PATH="$HOME/Library/Python/3.14/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+Quick verify:
+
+```bash
+graphify --version
+```
+
+Use it with your AI assistant:
+
+```bash
+/graphify .
+```
+
+## 8) Testing the supplier batch upload feature
+
+This feature lets a supplier submit a batch passport and see extraction results.
+
+### Setup
+
+Make sure the app is running and the database is seeded:
+
+```bash
+npm run db:seed
+npm run dev
+```
+
+### Walkthrough
+
+1. Open http://localhost:3000
+2. Click **Supplier Upload**
+3. Select a manufacturer from the dropdown (KTM, Fisher, or Giro)
+4. Enter an order number, e.g. `ORD-9001`
+5. Enter a batch number, e.g. `BAT-100`
+6. Attach the sample file below and click **Submit Batch**
+7. You are redirected to http://localhost:3000/supplier/batches
+8. Find your new batch in the list — status is either `complete` or `missing information`
+9. Click the order number to open the batch detail page and see which fields were extracted
+
+### Sample upload file
+
+A ready-made CSV is included at `public/sample-passport.csv`. Download it from:
+
+```
+http://localhost:3000/sample-passport.csv
+```
+
+Contents:
+
+```csv
+field,value
+product_name,LFP Battery Pack 750Wh
+material,Lithium Iron Phosphate
+origin_country,Germany
+supplier_name,CellChem GmbH
+sustainability_notes,Certified carbon-neutral manufacturing process
+```
+
+> Extraction is mocked — the result (complete vs missing information) is random. Submit the same file multiple times to see both outcomes.
+
+### Seed data
+
+The seed creates three pre-populated batches you can browse without submitting anything:
+
+| Batch | Status |
+|-------|--------|
+| BAT-001 | processing |
+| BAT-002 | complete — all 5 fields populated |
+| BAT-003 | missing information — origin\_country, supplier\_name, sustainability\_notes missing |
+
+View them at http://localhost:3000/supplier/batches
+
+---
+
 ## 8) Common issues and fixes
 
 ### "Port 3000 is already in use"

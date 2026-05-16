@@ -19,7 +19,11 @@
 - Use `npm test` for behavior or component changes.
 - Use Prisma migration and seed commands when database schema or seed data changes.
 
+## Commit Messages
+Commit automatically when a logical unit of work is complete — do not wait to be asked, but do not commit every file change separately. Always use the exact format `<type>(<scope>): <description>` — for example `feat(ui): add batch status badges` or `chore(db): add passport document migration` — never deviations like `feat: US-004 - Title` or any format without a scope in parentheses. Never commit internal tracking updates (e.g. progress logs, prd.json status fields) as standalone commits — include them in the related code commit or skip them entirely. Never add `Co-Authored-By` trailers. Subject line must be lowercase, imperative, no period, and ≤ 72 characters.
+
 ## Documentation
 - Keep this file limited to durable agent guidance and best practices.
 - Keep product requirements, user flows, scope, and acceptance criteria in `docs/PRD.md`.
 - Keep beginner setup and operational commands in `README.md`.
+
