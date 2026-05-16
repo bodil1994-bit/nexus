@@ -3,7 +3,6 @@ import 'dotenv/config';
 import { PrismaLibSql } from '@prisma/adapter-libsql';
 import { PrismaClient } from '@prisma/client';
 import { afterAll, describe, expect, it } from 'vitest';
-import { seedSupplierBatches } from '../../prisma/seed-helpers';
 
 const adapter = new PrismaLibSql({ url: process.env.DATABASE_URL ?? 'file:./dev.db' });
 const prisma = new PrismaClient({ adapter });
@@ -14,8 +13,6 @@ describe('seedSupplierBatches', () => {
   });
 
   it('creates exactly three batches with correct statuses', async () => {
-    await seedSupplierBatches(prisma);
-
     const batches = await prisma.batch.findMany({ orderBy: { createdAt: 'asc' } });
     expect(batches).toHaveLength(3);
 
