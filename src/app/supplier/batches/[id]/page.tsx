@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
-import { CANONICAL_FIELDS } from '@/lib/mock-extraction';
 
 export default async function BatchDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -10,7 +9,6 @@ export default async function BatchDetailPage({ params }: { params: Promise<{ id
     where: { id },
     include: {
       order: { include: { supplier: true, manufacturer: true } },
-      passportDocuments: true,
       passport: { include: { batteryData: true } },
     },
   });
@@ -19,9 +17,9 @@ export default async function BatchDetailPage({ params }: { params: Promise<{ id
     notFound();
   }
 
-  const doc = batch.passportDocuments[0];
-  const extractedFields = (doc?.extractedFields ?? {}) as Record<string, string | null>;
-  const missingFields = (doc?.missingFields ?? []) as string[];
+  const missingFields: string[] = batch.missingFieldsJson
+    ? (JSON.parse(batch.missingFieldsJson) as string[])
+    : [];
   const passport = batch.passport;
   const bd = passport?.batteryData;
 
@@ -64,30 +62,6 @@ export default async function BatchDetailPage({ params }: { params: Promise<{ id
               </ul>
             </div>
           )}
-
-          <h2 className="text-sm font-medium text-zinc-500 uppercase tracking-wide mb-4">
-            Passport Fields
-          </h2>
-          <dl className="space-y-3">
-            {CANONICAL_FIELDS.map((field) => {
-              const value = extractedFields[field];
-              const isMissing = !value;
-              return (
-                <div key={field} className="flex items-start gap-4">
-                  <dt className="w-40 shrink-0 text-sm text-zinc-500">{field.replace(/_/g, ' ')}</dt>
-                  <dd className="text-sm">
-                    {isMissing ? (
-                      <span className="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium bg-red-100 text-red-700">
-                        Missing
-                      </span>
-                    ) : (
-                      <span className="text-zinc-900">{value}</span>
-                    )}
-                  </dd>
-                </div>
-              );
-            })}
-          </dl>
 
           {passport && (
             <div className="mt-8 pt-8 border-t border-zinc-100">

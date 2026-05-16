@@ -12,7 +12,7 @@ describe('Prisma models exist', () => {
     expect(prisma.batch).toBeDefined();
   });
 
-  it('passportDocument model is defined', () => {
-    expect(prisma.passportDocument).toBeDefined();
+  it('digitalProductPassport model is defined', () => {
+    expect(prisma.digitalProductPassport).toBeDefined();
   });
 });

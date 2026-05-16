@@ -25,35 +25,36 @@ describe('seedSupplierBatches', () => {
     expect(statuses).toContain('missing_information');
   });
 
-  it('each batch has at least one PassportDocument', async () => {
-    const batches = await prisma.batch.findMany({ include: { passportDocuments: true } });
-    for (const batch of batches) {
-      expect(batch.passportDocuments.length).toBeGreaterThanOrEqual(1);
-    }
-  });
-
-  it('missing_information batch has at least two entries in missingFields', async () => {
-    const batch = await prisma.batch.findFirst({
-      where: { status: 'missing_information' },
-      include: { passportDocuments: true },
-    });
-    expect(batch).not.toBeNull();
-    const doc = batch!.passportDocuments[0];
-    const missing = doc.missingFields as string[];
-    expect(missing.length).toBeGreaterThanOrEqual(2);
-  });
-
-  it('complete batch has all five canonical fields populated', async () => {
+  it('complete batch has a DigitalProductPassport with battery data', async () => {
     const batch = await prisma.batch.findFirst({
       where: { status: 'complete' },
-      include: { passportDocuments: true },
+      include: { passport: { include: { batteryData: true } } },
     });
     expect(batch).not.toBeNull();
-    const doc = batch!.passportDocuments[0];
-    const fields = doc.extractedFields as Record<string, string | null>;
-    const canonical = ['product_name', 'material', 'origin_country', 'supplier_name', 'sustainability_notes'];
-    for (const key of canonical) {
-      expect(fields[key]).toBeTruthy();
+    expect(batch!.passport).not.toBeNull();
+    expect(batch!.passport!.batteryData).not.toBeNull();
+  });
+
+  it('battery data has key identification fields populated', async () => {
+    const passport = await prisma.digitalProductPassport.findFirst({
+      include: { batteryData: true },
+    });
+    expect(passport).not.toBeNull();
+    const bd = passport!.batteryData!;
+    expect(bd.uniqueBatteryIdentifier).toBeTruthy();
+    expect(bd.batteryModel).toBeTruthy();
+    expect(bd.batteryChemistry).toBeTruthy();
+    expect(bd.manufacturerName).toBeTruthy();
+    expect(bd.grossCapacityKwh).toBeGreaterThan(0);
+  });
+
+  it('processing and missing_information batches have no passport', async () => {
+    const batches = await prisma.batch.findMany({
+      where: { status: { in: ['processing', 'missing_information'] } },
+      include: { passport: true },
+    });
+    for (const batch of batches) {
+      expect(batch.passport).toBeNull();
     }
   });
 });

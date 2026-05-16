@@ -51,25 +51,22 @@ export async function submitBatch(formData: FormData) {
     : ['passport.txt'];
 
   let finalStatus: 'complete' | 'missing_information' = 'complete';
+  let allMissingFields: string[] = [];
 
   for (const filename of filenames) {
     const result = mockExtract(filename);
     if (result.status === 'missing_information') {
       finalStatus = 'missing_information';
+      allMissingFields = [...new Set([...allMissingFields, ...result.missingFields])];
     }
-    await prisma.passportDocument.create({
-      data: {
-        batchId: batch.id,
-        filename,
-        extractedFields: result.extractedFields,
-        missingFields: result.missingFields,
-      },
-    });
   }
 
   await prisma.batch.update({
     where: { id: batch.id },
-    data: { status: finalStatus },
+    data: {
+      status: finalStatus,
+      missingFieldsJson: allMissingFields.length > 0 ? JSON.stringify(allMissingFields) : null,
+    },
   });
 
   redirect('/supplier/batches');
