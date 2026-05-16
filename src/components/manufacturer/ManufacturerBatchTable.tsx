@@ -100,7 +100,7 @@ export function ManufacturerBatchTable({ orders, onSelectBatch }: Props) {
                 </td>
                 <td className="px-4 py-3 text-zinc-700">
                   {batch.status === 'ERP_SYNCED' ? (
-                    <span className="text-green-700">Synced</span>
+                    <span className="text-green-700">ERP sync complete</span>
                   ) : (
                     <span className="text-zinc-400">—</span>
                   )}

@@ -38,17 +38,25 @@ export async function seedSupplierBatches(prisma: PrismaClient) {
       orderId: order.id,
       manufacturerSku: 'BPT625',
       quantity: 500,
-      status: 'processing',
+      status: 'PROCESSING',
+      readinessScore: 40,
     },
   });
 
-  const completeBatch = await prisma.batch.create({
+  const erpSyncedBatch = await prisma.batch.create({
     data: {
       batchNumber: 'BAT-PT625-002',
       orderId: order.id,
       manufacturerSku: 'BPT625',
       quantity: 300,
-      status: 'complete',
+      status: 'ERP_SYNCED',
+      readinessScore: 100,
+      erpSyncedAt: new Date('2024-06-18T09:30:00.000Z'),
+      erpPayloadJson: JSON.stringify({
+        orderNumber: 'ORD-BSH-2024-0441',
+        batchNumber: 'BAT-PT625-002',
+        passportReferenceId: 'BAT-BSH-PT625-2024-008314',
+      }),
     },
   });
 
@@ -58,7 +66,14 @@ export async function seedSupplierBatches(prisma: PrismaClient) {
       orderId: order.id,
       manufacturerSku: 'BPT500',
       quantity: 200,
-      status: 'missing_information',
+      status: 'INCOMPLETE',
+      readinessScore: 68,
+      missingFieldsJson: JSON.stringify([
+        'grossCapacityKwh',
+        'carbonFootprintKgCo2ePerKwh',
+        'declarationOfConformityRef',
+      ]),
+      supplierNotifiedAt: new Date('2024-06-18T10:15:00.000Z'),
     },
   });
 
@@ -67,7 +82,7 @@ export async function seedSupplierBatches(prisma: PrismaClient) {
       passportId: 'BAT-BSH-PT625-2024-008314',
       passportType: 'BATTERY',
       passportUrl: 'https://bat-passport.bosch.com/BAT-BSH-PT625-2024-008314',
-      batchId: completeBatch.id,
+      batchId: erpSyncedBatch.id,
     },
   });
 
@@ -240,5 +255,5 @@ export async function seedSupplierBatches(prisma: PrismaClient) {
     },
   });
 
-  return { processingBatch, completeBatch, missingBatch };
+  return { processingBatch, erpSyncedBatch, missingBatch };
 }

@@ -20,19 +20,34 @@ describe('seedSupplierBatches', () => {
     expect(batches).toHaveLength(3);
 
     const statuses = batches.map((b) => b.status);
-    expect(statuses).toContain('processing');
-    expect(statuses).toContain('complete');
-    expect(statuses).toContain('missing_information');
+    expect(statuses).toContain('PROCESSING');
+    expect(statuses).toContain('ERP_SYNCED');
+    expect(statuses).toContain('INCOMPLETE');
   });
 
-  it('complete batch has a DigitalProductPassport with battery data', async () => {
+  it('ERP-synced batch has a DigitalProductPassport with battery data', async () => {
     const batch = await prisma.batch.findFirst({
-      where: { status: 'complete' },
+      where: { status: 'ERP_SYNCED' },
       include: { passport: { include: { batteryData: true } } },
     });
     expect(batch).not.toBeNull();
     expect(batch!.passport).not.toBeNull();
     expect(batch!.passport!.batteryData).not.toBeNull();
+    expect(batch!.erpSyncedAt).not.toBeNull();
+    expect(batch!.erpPayloadJson).toContain('passportReferenceId');
+  });
+
+  it('incomplete batch has missing fields and supplier notification', async () => {
+    const batch = await prisma.batch.findFirst({
+      where: { status: 'INCOMPLETE' },
+    });
+    expect(batch).not.toBeNull();
+    expect(JSON.parse(batch!.missingFieldsJson!)).toEqual([
+      'grossCapacityKwh',
+      'carbonFootprintKgCo2ePerKwh',
+      'declarationOfConformityRef',
+    ]);
+    expect(batch!.supplierNotifiedAt).not.toBeNull();
   });
 
   it('battery data has key identification fields populated', async () => {
@@ -79,9 +94,9 @@ describe('seedSupplierBatches', () => {
     expect(compoundFields).toEqual([]);
   });
 
-  it('processing and missing_information batches have no passport', async () => {
+  it('processing and incomplete batches have no passport', async () => {
     const batches = await prisma.batch.findMany({
-      where: { status: { in: ['processing', 'missing_information'] } },
+      where: { status: { in: ['PROCESSING', 'INCOMPLETE'] } },
       include: { passport: true },
     });
     for (const batch of batches) {
