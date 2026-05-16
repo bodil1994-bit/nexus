@@ -15,6 +15,8 @@ export function getBatchStatusLabel(status: string): string {
       return 'Data missing';
     case 'ERP_SYNCED':
       return 'ERP synced';
+    case '_SUPPLIER_COMPLETE':
+      return 'Complete';
     default:
       return 'Processing';
   }

@@ -163,7 +163,7 @@ npm run dev
 
 1. Open http://localhost:3000
 2. Click **Supplier Upload**
-3. Select a manufacturer from the dropdown (KTM Sportmotorcycle GmbH, Fisher, or Giro)
+3. Select a manufacturer from the dropdown (KTM GmbH, Fisher, or Giro)
 4. Enter an order number, e.g. `ORD-9001`
 5. Enter a batch number, e.g. `BAT-100`
 6. Attach the sample file below and click **Submit Batch**

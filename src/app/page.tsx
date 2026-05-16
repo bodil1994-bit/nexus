@@ -33,7 +33,7 @@ export default function Home() {
             <div className="flex flex-col items-start -space-y-0.5">
               <span className="text-[10px] font-bold uppercase tracking-tight text-slate-400">Manufacturer</span>
               <span className="text-xs font-bold flex items-center gap-1">
-                KTM Sportmotorcycle GmbH <ChevronDown size={10} className="text-slate-400 group-hover:text-slate-600 transition-colors" />
+                KTM Fahrrad GmbH <ChevronDown size={10} className="text-slate-400 group-hover:text-slate-600 transition-colors" />
               </span>
             </div>
           </Link>

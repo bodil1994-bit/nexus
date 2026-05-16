@@ -98,7 +98,7 @@ export default function SupplierUploadPage() {
 
     const done = setTimeout(() => {
       setStage('extracted');
-    }, EXTRACTION_STEPS.length * stepDuration + 100);
+    }, EXTRACTION_STEPS.length * stepDuration + 500);
     timerRefs.current.push(done);
   }
 
@@ -137,7 +137,7 @@ export default function SupplierUploadPage() {
                       name="manufacturer"
                       className="w-full appearance-none rounded-xl border border-slate-200 bg-white/50 px-4 py-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500/40 transition-all cursor-pointer shadow-sm"
                     >
-                      <option value="ktm">KTM Sportmotorcycle GmbH</option>
+                      <option value="ktm">KTM Fahrrad GmbH</option>
                       <option value="fisher">Fisher E-Bikes</option>
                       <option value="giro">Giro Helmets &amp; Accessories</option>
                     </select>

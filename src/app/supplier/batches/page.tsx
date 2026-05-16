@@ -70,13 +70,15 @@ export default async function BatchListPage() {
                         </Link>
                       </td>
                       <td className="px-6 py-4 text-slate-600">{batch.batchNumber}</td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <span className="font-mono text-[10px] text-slate-500 bg-slate-50 px-2 py-1 rounded border border-slate-100">
                           {batch.passport?.passportId ?? 'PENDING'}
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <BatchStatusBadge status={batch.status} />
+                        <BatchStatusBadge
+                          status={batch.status === 'ERP_SYNCED' ? '_SUPPLIER_COMPLETE' : batch.status}
+                        />
                       </td>
                       <td className="px-6 py-4">
                         {batch.erpSyncedAt ? (

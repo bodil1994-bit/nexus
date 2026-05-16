@@ -21,7 +21,7 @@ export async function seedSupplierBatches(prisma: PrismaClient) {
   });
 
   const manufacturer = await prisma.manufacturer.create({
-    data: { name: 'KTM Sportmotorcycle GmbH' },
+    data: { name: 'KTM Fahrrad GmbH' },
   });
 
   const order = await prisma.order.create({
@@ -51,7 +51,7 @@ export async function seedSupplierBatches(prisma: PrismaClient) {
       quantity: 300,
       status: 'ERP_SYNCED',
       readinessScore: 100,
-      erpSyncedAt: new Date('2024-06-18T09:30:00.000Z'),
+      erpSyncedAt: new Date('2026-05-16T18:18:00.000Z'),
       erpPayloadJson: JSON.stringify({
         orderNumber: 'ORD-KTM-BSH-2024',
         batchNumber: 'BAT-BSH-PT625-002',

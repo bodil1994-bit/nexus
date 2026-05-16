@@ -11,6 +11,9 @@ export function BatchStatusBadge({ status }: { status: string }) {
     case 'ERP_SYNCED':
       styles = 'bg-emerald-100 text-emerald-700 border border-emerald-200/50';
       break;
+    case '_SUPPLIER_COMPLETE':
+      styles = 'bg-emerald-100 text-emerald-700 border border-emerald-200/50';
+      break;
     case 'PROCESSING':
     default:
       styles = 'bg-slate-100 text-slate-600 border border-slate-200/50';
@@ -19,7 +22,7 @@ export function BatchStatusBadge({ status }: { status: string }) {
 
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${styles} shadow-sm`}
+      className={`inline-flex items-center justify-center w-24 rounded-full py-0.5 text-[10px] font-bold uppercase tracking-wider ${styles} shadow-sm`}
     >
       {label}
     </span>
