@@ -37,9 +37,10 @@ describe('seedSupplierBatches', () => {
     expect(batch!.erpPayloadJson).toContain('passportReferenceId');
   });
 
-  it('incomplete batch has missing fields and supplier notification', async () => {
+  it('incomplete batch has missing fields, supplier notification, and passport ID', async () => {
     const batch = await prisma.batch.findFirst({
       where: { status: 'INCOMPLETE' },
+      include: { passport: true },
     });
     expect(batch).not.toBeNull();
     expect(JSON.parse(batch!.missingFieldsJson!)).toEqual([
@@ -48,6 +49,7 @@ describe('seedSupplierBatches', () => {
       'declarationOfConformityRef',
     ]);
     expect(batch!.supplierNotifiedAt).not.toBeNull();
+    expect(batch!.passport?.passportId).toBe('BAT-BSH-PT500-2024-008315');
   });
 
   it('battery data has key identification fields populated', async () => {
@@ -94,9 +96,9 @@ describe('seedSupplierBatches', () => {
     expect(compoundFields).toEqual([]);
   });
 
-  it('processing and incomplete batches have no passport', async () => {
+  it('processing batches have no passport before upload data exists', async () => {
     const batches = await prisma.batch.findMany({
-      where: { status: { in: ['PROCESSING', 'INCOMPLETE'] } },
+      where: { status: 'PROCESSING' },
       include: { passport: true },
     });
     for (const batch of batches) {

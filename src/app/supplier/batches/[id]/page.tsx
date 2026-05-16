@@ -22,6 +22,14 @@ export default async function BatchDetailPage({ params }: { params: Promise<{ id
     : [];
   const passport = batch.passport;
   const bd = passport?.batteryData;
+  const statusStyle =
+    batch.status === 'PROCESSING' || batch.status === 'processing'
+      ? 'bg-yellow-100 text-yellow-800'
+      : batch.status === 'COMPLETE' || batch.status === 'ERP_SYNCED' || batch.status === 'complete'
+        ? 'bg-green-100 text-green-800'
+        : 'bg-red-100 text-red-800';
+  const isMissingInformation =
+    batch.status === 'INCOMPLETE' || batch.status === 'missing_information';
 
   return (
     <div className="min-h-screen bg-zinc-50 py-12 px-4">
@@ -38,19 +46,13 @@ export default async function BatchDetailPage({ params }: { params: Promise<{ id
               {batch.order.orderNumber} / {batch.batchNumber}
             </h1>
             <span
-              className={`mt-2 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                batch.status === 'processing'
-                  ? 'bg-yellow-100 text-yellow-800'
-                  : batch.status === 'complete'
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-red-100 text-red-800'
-              }`}
+              className={`mt-2 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusStyle}`}
             >
-              {batch.status.replace('_', ' ')}
+              {batch.status.replace('_', ' ').toLowerCase()}
             </span>
           </div>
 
-          {batch.status === 'missing_information' && missingFields.length > 0 && (
+          {isMissingInformation && missingFields.length > 0 && (
             <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
               <p className="text-sm font-medium text-red-800 mb-2">Missing fields:</p>
               <ul className="list-disc list-inside space-y-1">
@@ -71,7 +73,7 @@ export default async function BatchDetailPage({ params }: { params: Promise<{ id
               <dl className="space-y-3 mb-6">
                 <div className="flex items-start gap-4">
                   <dt className="w-40 shrink-0 text-sm text-zinc-500">Passport ID</dt>
-                  <dd className="text-sm text-zinc-900 font-mono">{passport.passportId}</dd>
+                  <dd className="text-sm text-zinc-900 font-mono">{passport.passportId ?? '—'}</dd>
                 </div>
                 <div className="flex items-start gap-4">
                   <dt className="w-40 shrink-0 text-sm text-zinc-500">Type</dt>

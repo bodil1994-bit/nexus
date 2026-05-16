@@ -1,7 +1,8 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { mockExtract } from '@/lib/mock-extraction';
+import { CANONICAL_FIELDS, mockExtract } from '@/lib/mock-extraction';
+import { createPassportReferenceId } from '@/lib/passport-reference';
 import { redirect } from 'next/navigation';
 
 export async function submitBatch(formData: FormData) {
@@ -42,7 +43,7 @@ export async function submitBatch(formData: FormData) {
       orderId: order.id,
       manufacturerSku: `SKU-${batchNumber}`,
       quantity: 1,
-      status: 'processing',
+      status: 'PROCESSING',
     },
   });
 
@@ -50,22 +51,45 @@ export async function submitBatch(formData: FormData) {
     ? files.map((f) => f.name)
     : ['passport.txt'];
 
-  let finalStatus: 'complete' | 'missing_information' = 'complete';
+  let finalStatus: 'COMPLETE' | 'INCOMPLETE' = 'COMPLETE';
   let allMissingFields: string[] = [];
+  let extractedFields: Record<string, string | null> = {};
 
   for (const filename of filenames) {
     const result = mockExtract(filename);
     if (result.status === 'missing_information') {
-      finalStatus = 'missing_information';
+      finalStatus = 'INCOMPLETE';
       allMissingFields = [...new Set([...allMissingFields, ...result.missingFields])];
     }
+    extractedFields = { ...extractedFields, ...result.extractedFields };
   }
+
+  const passportReferenceId = createPassportReferenceId(orderNumber, batchNumber);
+  const readinessScore = Math.round(
+    ((CANONICAL_FIELDS.length - allMissingFields.length) / CANONICAL_FIELDS.length) * 100,
+  );
 
   await prisma.batch.update({
     where: { id: batch.id },
     data: {
       status: finalStatus,
+      readinessScore,
       missingFieldsJson: allMissingFields.length > 0 ? JSON.stringify(allMissingFields) : null,
+      passport: {
+        create: {
+          passportId: passportReferenceId,
+          passportType: 'BATTERY',
+          passportUrl: `https://passport.nexus.local/${passportReferenceId}`,
+          batteryData: {
+            create: {
+              uniqueBatteryIdentifier: passportReferenceId,
+              batteryModel: extractedFields.product_name,
+              batteryChemistry: extractedFields.material,
+              manufacturerName: extractedFields.supplier_name,
+            },
+          },
+        },
+      },
     },
   });
 

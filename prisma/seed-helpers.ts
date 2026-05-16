@@ -86,6 +86,24 @@ export async function seedSupplierBatches(prisma: PrismaClient) {
     },
   });
 
+  await prisma.digitalProductPassport.create({
+    data: {
+      passportId: 'BAT-BSH-PT500-2024-008315',
+      passportType: 'BATTERY',
+      passportUrl: 'https://bat-passport.bosch.com/BAT-BSH-PT500-2024-008315',
+      batchId: missingBatch.id,
+      batteryData: {
+        create: {
+          uniqueBatteryIdentifier: 'BAT-BSH-PT500-2024-008315',
+          batteryModel: 'Bosch PowerTube 500 Wh',
+          batteryChemistry: 'Lithium-Nickel-Manganese-Cobalt Oxide (NMC622)',
+          manufacturerName: 'Robert Bosch GmbH',
+          manufactureYear: 2024,
+        },
+      },
+    },
+  });
+
   await prisma.batteryPassportData.create({
     data: {
       passportDbId: passport.id,

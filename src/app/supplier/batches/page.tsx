@@ -2,6 +2,9 @@ import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 
 const STATUS_STYLES: Record<string, string> = {
+  PROCESSING: 'bg-yellow-100 text-yellow-800',
+  COMPLETE: 'bg-green-100 text-green-800',
+  INCOMPLETE: 'bg-red-100 text-red-800',
   processing: 'bg-yellow-100 text-yellow-800',
   complete: 'bg-green-100 text-green-800',
   missing_information: 'bg-red-100 text-red-800',
@@ -9,13 +12,13 @@ const STATUS_STYLES: Record<string, string> = {
 
 export default async function BatchListPage() {
   const batches = await prisma.batch.findMany({
-    include: { order: true },
+    include: { order: true, passport: true },
     orderBy: { createdAt: 'desc' },
   });
 
   return (
     <div className="min-h-screen bg-zinc-50 py-12 px-4">
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-semibold text-zinc-900">Batches</h1>
           <Link
@@ -34,6 +37,7 @@ export default async function BatchListPage() {
                 <tr>
                   <th className="px-4 py-3 text-left font-medium text-zinc-500">Order</th>
                   <th className="px-4 py-3 text-left font-medium text-zinc-500">Batch</th>
+                  <th className="px-4 py-3 text-left font-medium text-zinc-500">Passport ID</th>
                   <th className="px-4 py-3 text-left font-medium text-zinc-500">Status</th>
                   <th className="px-4 py-3 text-left font-medium text-zinc-500">Created</th>
                 </tr>
@@ -47,11 +51,14 @@ export default async function BatchListPage() {
                       </Link>
                     </td>
                     <td className="px-4 py-3 text-zinc-700">{batch.batchNumber}</td>
+                    <td className="px-4 py-3 font-mono text-xs text-zinc-600">
+                      {batch.passport?.passportId ?? '—'}
+                    </td>
                     <td className="px-4 py-3">
                       <span
                         className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_STYLES[batch.status] ?? 'bg-zinc-100 text-zinc-700'}`}
                       >
-                        {batch.status.replace('_', ' ')}
+                        {batch.status.replace('_', ' ').toLowerCase()}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-zinc-500">
