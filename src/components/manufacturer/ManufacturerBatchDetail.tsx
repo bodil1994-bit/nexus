@@ -4,7 +4,7 @@ import { MissingFieldsList } from './MissingFieldsList';
 import { ErpPayloadPreview } from './ErpPayloadPreview';
 import { BatchActions } from './BatchActions';
 import type { OrderRow, BatchRow } from './ManufacturerBatchTable';
-import { X, Info, Database, FileText, Activity } from 'lucide-react';
+import { X, Info, Database, FileText, Activity, ExternalLink } from 'lucide-react';
 
 type Props = {
   order: OrderRow;
@@ -156,12 +156,17 @@ export function ManufacturerBatchDetail({ order, batch, onClose }: Props) {
             />
           </section>
           
-          {batch.passport?.passportUrl && (
+          {batch.status === 'ERP_SYNCED' && batch.passport?.passportUrl && (
             <div className="pt-6 border-t border-slate-100">
-               <dt className="text-slate-400 text-[10px] uppercase font-bold tracking-widest mb-2">Internal Passport URL</dt>
-               <dd className="break-all text-[10px] font-mono text-slate-500 bg-slate-100/50 p-3 rounded border border-slate-200/50">
-                 {batch.passport.passportUrl}
-               </dd>
+              <a
+                href={batch.passport.passportUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-600 transition-colors shadow-sm shadow-emerald-500/20"
+              >
+                View Customer Passport
+                <ExternalLink size={14} />
+              </a>
             </div>
           )}
         </div>
