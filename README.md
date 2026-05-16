@@ -206,6 +206,69 @@ View them at http://localhost:3000/supplier/batches
 
 ---
 
+## 9) Hackathon demo: Manufacturer Dashboard
+
+This section shows judges and reviewers how to run and navigate the manufacturer dashboard.
+
+### Setup
+
+```bash
+npm run db:seed
+npm run dev
+```
+
+Open: http://localhost:3000/manufacturer/orders
+
+### What you will see
+
+**Header:** "Manufacturer Dashboard" with manufacturer name (Robert Bosch GmbH) pulled from seed data.
+
+**KPI cards (4 totals):**
+
+| Card | Value (seed data) |
+|------|-------------------|
+| Total batches | 3 |
+| Processing | 1 |
+| Incomplete | 1 |
+| ERP synced | 1 |
+
+**Batch table:** All batches from order `ORD-BSH-2024-0441`, submitted by Samsung SDI Co., Ltd.
+
+| Batch | SKU | Status | Notes |
+|-------|-----|--------|-------|
+| BAT-PT625-001 | BPT625 | Processing | Passport submitted, processing |
+| BAT-PT625-002 | BPT625 | ERP synced | All fields complete, synced |
+| BAT-PT500-003 | BPT500 | Incomplete | Missing fields, supplier notified |
+
+### Key interactions to demo
+
+**1. Incomplete batch:**
+- Click **View** on BAT-PT500-003
+- Detail panel shows: "Data missing" badge, list of missing fields with readable labels, supplier email, notification timestamp
+- Actions section shows: enrichment and retailer export blocked, "Data requested from supplier"
+
+**2. ERP synced batch:**
+- Click **View** on BAT-PT625-002
+- Detail panel shows: ERP sync timestamp, payload preview `{ orderNumber, batchNumber, passportReferenceId }`
+- Passport data section shows canonical battery fields (chemistry, capacity, carbon footprint, etc.)
+- Actions section shows: View enrichment, Retailer export, View ERP payload buttons
+
+**3. Processing batch:**
+- Click **View** on BAT-PT625-001
+- Detail panel shows: "ERP sync pending processing result." — no export actions yet
+
+### Run tests before demo
+
+```bash
+npm run typecheck
+npm run lint
+npm test
+```
+
+All checks must pass. Tests cover the API route, helper functions, and seed data shape.
+
+---
+
 ## 8) Common issues and fixes
 
 ### "Port 3000 is already in use"
