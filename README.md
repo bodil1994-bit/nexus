@@ -11,6 +11,98 @@ This is a Next.js web app with a local SQLite database managed by Prisma.
 - Database: SQLite (local file)
 - ORM/tooling: Prisma
 
+## Team schema overview
+
+This is the current database shape in `prisma/schema.prisma`.
+
+```text
+             +------------------------+        +------------------------+
+             | Supplier               |        | Manufacturer           |
+             |------------------------|        |------------------------|
+             | id                     |        | id                     |
+             | name                   |        | name                   |
+             | email                  |        +------------------------+
+             +------------------------+                  |
+                       |                                  |
+                       | 1                                | 1
+                       |                                  |
+                       | many                             | many
+                       v                                  v
+             +----------------------------------------------------------+
+             | Order                                                    |
+             |----------------------------------------------------------|
+             | id                                                       |
+             | orderNumber                                              |
+             | supplierId        -> Supplier.id                         |
+             | manufacturerId    -> Manufacturer.id                     |
+             | unique(orderNumber, supplierId, manufacturerId)          |
+             +----------------------------------------------------------+
+                                           |
+                                           | 1
+                                           |
+                                           | many
+                                           v
+             +----------------------------------------------------------+
+             | Batch                                                    |
+             |----------------------------------------------------------|
+             | id                                                       |
+             | batchNumber                                              |
+             | orderId           -> Order.id                            |
+             | manufacturerSku                                          |
+             | quantity                                                 |
+             | status                                                   |
+             | rawInputText                                             |
+             | sourceFormat                                             |
+             | missingFieldsJson                                        |
+             | readinessScore                                           |
+             | supplierNotifiedAt                                       |
+             | erpSyncedAt                                              |
+             | erpPayloadJson                                           |
+             | createdAt                                                |
+             | updatedAt                                                |
+             | unique(orderId, batchNumber)                             |
+             +----------------------------------------------------------+
+                         |
+                         | 1
+                         |
+                         | 1
+                         v
++----------------------------------+
+| DigitalProductPassport           |
+|----------------------------------|
+| id                               |
+| passportId                       |
+| passportType                     |
+| passportUrl                      |
+| batchId -> Batch.id              |
+| createdAt                        |
+| updatedAt                        |
++----------------------------------+
+             |
+             | 1
+             |
+             | 1
+             v
++----------------------------------+
+| BatteryPassportData              |
+|----------------------------------|
+| id                               |
+| passportDbId -> Passport.id      |
+| required MVP battery fields      |
+| extended battery passport fields |
+| createdAt                        |
+| updatedAt                        |
++----------------------------------+
+```
+
+Key relationships:
+
+- `Supplier -> Order` is one-to-many.
+- `Manufacturer -> Order` is one-to-many.
+- `Order -> Batch` is one-to-many.
+- `Batch -> DigitalProductPassport` is one-to-one.
+- `DigitalProductPassport -> BatteryPassportData` is one-to-one.
+
 ## 1) Install required software
 
 You need these installed on your computer:
