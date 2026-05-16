@@ -1,13 +1,190 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
-generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
-}
-
 datasource db {
   provider = "sqlite"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Supplier {
+  id     String  @id @default(cuid())
+  name   String  @unique
+  email  String?
+  orders Order[]
+}
+
+model Manufacturer {
+  id     String @id @default(cuid())
+  name   String @unique
+  orders Order[]
+}
+
+model Order {
+  id             String       @id @default(cuid())
+  orderNumber    String
+  supplierId     String
+  supplier       Supplier     @relation(fields: [supplierId], references: [id])
+  manufacturerId String
+  manufacturer   Manufacturer @relation(fields: [manufacturerId], references: [id])
+  batches        Batch[]
+
+  @@unique([orderNumber, supplierId, manufacturerId])
+}
+
+model Batch {
+  id                 String                  @id @default(cuid())
+  batchNumber        String
+  orderId            String
+  order              Order                   @relation(fields: [orderId], references: [id])
+  manufacturerSku    String
+  quantity           Int
+  status             String                  @default("PROCESSING")
+  // PROCESSING | INCOMPLETE | COMPLETE | ERP_SYNCED
+  rawInputText       String?
+  sourceFormat       String?
+  // CSV | JSON | XLSX | XML | PDF | API | TEXT
+  missingFieldsJson  String?
+  readinessScore     Int                     @default(0)
+  supplierNotifiedAt DateTime?
+  erpSyncedAt        DateTime?
+  erpPayloadJson     String?
+  passport           DigitalProductPassport?
+
+  @@unique([orderId, batchNumber])
+}
+
+model DigitalProductPassport {
+  id           String               @id @default(cuid())
+  passportId   String?              @unique
+  passportType String               @default("BATTERY")
+  passportUrl  String?
+  batchId      String               @unique
+  batch        Batch                @relation(fields: [batchId], references: [id])
+  batteryData  BatteryPassportData?
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+}
+
+model BatteryPassportData {
+  id                                     String                 @id @default(cuid())
+  passportDbId                           String                 @unique
+  passport                               DigitalProductPassport @relation(fields: [passportDbId], references: [id])
+  uniqueBatteryIdentifier                String?
+  batteryCategory                        String?
+  batteryModel                           String?
+  batteryChemistry                       String?
+  manufacturerName                       String?
+  manufactureYear                        Int?
+  grossCapacityKwh                       Float?
+  carbonFootprintKgCo2ePerKwh            Float?
+  recycledCobaltPercentage               Float?
+  recycledLithiumPercentage              Float?
+  declarationOfConformityRef             String?
+  qrCodeAffixed                          Boolean?
+  qrCodeUrl                              String?
+  issueDate                              String?
+  manufacturerIdentification             String?
+  batteryCategoryAndModel                String?
+  placeOfManufacture                     String?
+  dateOfManufacture                      String?
+  batteryWeight                          String?
+  ratedCapacity                          String?
+  chemicalComposition                    String?
+  hazardousSubstances                    String?
+  fireExtinguishingAgent                 String?
+  criticalRawMaterials                   String?
+  carbonFootprintTotal                   String?
+  carbonFootprintPerformanceClass        String?
+  carbonDeclarationManufacturerDetails   String?
+  carbonDeclarationBatteryModel          String?
+  carbonDeclarationManufacturingLocation String?
+  carbonFootprintLifecycleBreakdown      String?
+  carbonDeclarationDocReference          String?
+  carbonDeclarationWebLink               String?
+  recycledContentCobalt                  String?
+  recycledContentLithium                 String?
+  recycledContentNickel                  String?
+  recycledContentLead                    String?
+  renewableContentShare                  String?
+  dueDiligenceStrategy                   String?
+  dueDiligenceReport                     String?
+  dueDiligenceVerificationSummary        String?
+  supplyChainRawMaterialDescription      String?
+  supplyChainSupplierInfo                String?
+  supplyChainCountryOfOrigin             String?
+  supplyChainRawMaterialQuantities       String?
+  supplyChainAuditReport                 String?
+  supplyChainConflictAreas               String?
+  recycledSourceEvidence                 String?
+  ratedCapacityAh                        String?
+  minimumVoltage                         String?
+  nominalVoltage                         String?
+  maximumVoltage                         String?
+  originalPowerCapability                String?
+  powerLimits                            String?
+  expectedLifetimeCycles                 String?
+  capacityThresholdExhaustion            String?
+  temperatureRangeStorage                String?
+  warrantyCalendarLife                   String?
+  roundTripEfficiencyInitial             String?
+  roundTripEfficiencyAt50PctCycles       String?
+  internalResistanceCell                 String?
+  internalResistancePack                 String?
+  cRateCycleLifeTest                     String?
+  euDeclarationOfConformity              String?
+  docReferenceNumber                     String?
+  ceMarking                              String?
+  labellingRequirements                  String?
+  cadmiumMarking                         String?
+  leadMarking                            String?
+  wasteInfoEndUserRole                   String?
+  wasteInfoSeparateCollection            String?
+  wasteInfoTakebackPoints                String?
+  wasteInfoSafetyInstructions            String?
+  wasteInfoLabelMeanings                 String?
+  wasteInfoHazardousSubstanceImpacts     String?
+  individualBatteryIdentifier            String?
+  qrCode                                 String?
+  operatingInstructionsReference         String?
+  previousBatteryPassportLink            String?
+  detailedCompositionCathode             String?
+  detailedCompositionAnode               String?
+  detailedCompositionElectrolyte         String?
+  partNumbersComponents                  String?
+  sparePartsSupplierContacts             String?
+  disassemblyExplodedDiagrams            String?
+  disassemblySequence                    String?
+  disassemblyJoiningTechniques           String?
+  disassemblyRequiredTools               String?
+  disassemblyDamageWarnings              String?
+  disassemblyCellCountArrangement        String?
+  safetyMeasures                         String?
+  testReportResults                      String?
+  ceNotifiedBodyReference                String?
+  technicalDocumentationStandards        String?
+  technicalDocumentationGeneralDescription String?
+  individualRatedCapacityAndFade         String?
+  individualPowerAndFade                 String?
+  individualInternalResistance           String?
+  individualRoundTripEfficiency          String?
+  individualRemainingLifetime            String?
+  sohStateOfCertifiedEnergy              String?
+  sohRemainingCapacity                   String?
+  sohRemainingPower                      String?
+  sohRemainingRoundTripEfficiency        String?
+  sohSelfDischargeRate                   String?
+  sohOhmicResistance                     String?
+  lifetimeManufactureAndCommissioningDate String?
+  lifetimeEnergyThroughput               String?
+  lifetimeCapacityThroughput             String?
+  lifetimeDeepDischarges                 String?
+  lifetimeExtremeTemperatureExposure     String?
+  lifetimeEquivalentFullCycles           String?
+  batteryStatus                          String?
+  chargeDischargeCycleCount              String?
+  negativeEventsLog                      String?
+  operatingTemperatureLog                String?
+  stateOfChargeLog                       String?
+  createdAt                              DateTime               @default(now())
+  updatedAt                              DateTime               @updatedAt
 }
