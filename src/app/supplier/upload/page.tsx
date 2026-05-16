@@ -7,6 +7,20 @@ export default function SupplierUploadPage() {
         <h1 className="text-2xl font-semibold text-zinc-900 mb-6">Submit Batch Passport</h1>
         <form action={submitBatch} encType="multipart/form-data" className="flex flex-col gap-5">
           <div className="flex flex-col gap-1.5">
+            <label htmlFor="manufacturer" className="text-sm font-medium text-zinc-700">
+              Manufacturer
+            </label>
+            <select
+              id="manufacturer"
+              name="manufacturer"
+              className="rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-400"
+            >
+              <option value="ktm">KTM</option>
+              <option value="fisher">Fisher</option>
+              <option value="giro">Giro</option>
+            </select>
+          </div>
+          <div className="flex flex-col gap-1.5">
             <label htmlFor="orderNumber" className="text-sm font-medium text-zinc-700">
               Order Number
             </label>
