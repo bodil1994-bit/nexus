@@ -49,8 +49,21 @@ model Batch {
   erpSyncedAt        DateTime?
   erpPayloadJson     String?
   passport           DigitalProductPassport?
+  passportDocuments  PassportDocument[]
+  createdAt          DateTime                @default(now())
+  updatedAt          DateTime                @updatedAt
 
   @@unique([orderId, batchNumber])
+}
+
+model PassportDocument {
+  id              String   @id @default(cuid())
+  batchId         String
+  batch           Batch    @relation(fields: [batchId], references: [id])
+  filename        String
+  extractedFields Json
+  missingFields   Json     @default("[]")
+  createdAt       DateTime @default(now())
 }
 
 model DigitalProductPassport {
