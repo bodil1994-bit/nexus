@@ -82,3 +82,39 @@ Started: Fri May 16 2026
   - BatteryPassportData from @prisma/client is the input type - import directly
   - renewableContentShare is a string field (not null/number) - check for empty string too
 ---
+
+## 2026-05-16 - US-DPP-003
+- Created `src/app/api/passport/[passportId]/route.ts` with GET handler
+- Queries `prisma.digitalProductPassport.findUnique({ where: { passportId }, include: { batteryData: true } })`
+- Returns 200 `{ passport: { id, passportId, passportUrl, passportType, batteryData } }` or 404 `{ error: 'Not found' }`
+- Files changed: src/app/api/passport/[passportId]/route.ts
+- **Learnings for future iterations:**
+  - Next.js 16 dynamic route params in API routes: `params` is a Promise - must `await params` before destructuring
+  - Pattern matches existing manufacturer orders route (NextResponse.json, prisma import from @/lib/prisma)
+---
+
+## 2026-05-16 - US-DPP-004
+- Created `src/app/passport/[passportId]/page.tsx` - async server component, queries prisma directly, passes RetailerPassportView to client component; renders 404 message if not found
+- Created `src/app/passport/[passportId]/PassportView.tsx` - 'use client' component with useState<'bike'|'battery'>, two screens: BikeScreen and BatteryScreen
+- BikeScreen: veloport header, e-bike hero image card, 2x2 grid of component cards; Battery card shows GradePill + model; other 3 show Coming soon badge
+- BatteryScreen: back button, header card with batteryModel + specs + large GradePill, ESG Profile flag chips (green/red), Category Breakdown accordion with lucide icons
+- GradePill inline component with grade->hex color map, two sizes (sm 28px, lg 56px)
+- Files changed: src/app/passport/[passportId]/page.tsx, src/app/passport/[passportId]/PassportView.tsx
+- Manual browser verification needed (no browser tools configured)
+- **Learnings for future iterations:**
+  - Next.js 16 server component page: `params` is `Promise<{ passportId: string }>` - must `await params`
+  - Use `// eslint-disable-next-line @next/next/no-img-element` for plain `<img>` tags (next/image not required for external URLs in this codebase)
+  - RetailerPassportView and Grade types exported from @/lib/retailer/buildRetailerPassport - import both for type safety in client components
+  - Pattern: server page queries prisma + transforms data, passes plain serializable object to client component
+---
+
+## 2026-05-16 - US-DPP-005
+- In `src/components/manufacturer/ManufacturerBatchDetail.tsx`, replaced Internal Passport URL dt/dd block with emerald CTA button
+- Button: `<a>` tag with target='_blank' rel='noopener noreferrer', styled as emerald pill with ExternalLink icon
+- Condition: `batch.status === 'ERP_SYNCED' && batch.passport?.passportUrl` (renders nothing otherwise)
+- Added ExternalLink to lucide-react import
+- Files changed: src/components/manufacturer/ManufacturerBatchDetail.tsx
+- **Learnings for future iterations:**
+  - ManufacturerBatchDetail is a server component (no 'use client') - use plain `<a>` tag not next/link for external/absolute href
+  - The passportUrl in the sidebar was already gated on `batch.passport?.passportUrl` - changed condition to also require ERP_SYNCED status
+---

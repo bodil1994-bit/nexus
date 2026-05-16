@@ -50,7 +50,7 @@
         "npm run lint passes"
       ],
       "priority": 3,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-DPP-004",
@@ -67,7 +67,7 @@
         "npm run lint passes"
       ],
       "priority": 4,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-DPP-005",
@@ -85,7 +85,7 @@
         "npm run lint passes"
       ],
       "priority": 5,
-      "passes": false
+      "passes": true
     }
   ]
 }
