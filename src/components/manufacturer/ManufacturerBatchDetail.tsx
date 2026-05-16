@@ -2,6 +2,7 @@ import { parseMissingFields } from '@/lib/manufacturer/dashboardStats';
 import { BatchStatusBadge } from './BatchStatusBadge';
 import { MissingFieldsList } from './MissingFieldsList';
 import { ErpPayloadPreview } from './ErpPayloadPreview';
+import { BatchActions } from './BatchActions';
 import type { OrderRow, BatchRow } from './ManufacturerBatchTable';
 
 type Props = {
@@ -122,6 +123,19 @@ export function ManufacturerBatchDetail({ order, batch, onClose }: Props) {
             </dl>
           </section>
         )}
+
+        <section className="border-t border-zinc-100 pt-6">
+          <h3 className="mb-3 text-sm font-medium text-zinc-700">Actions</h3>
+          <BatchActions
+            batchId={batch.id}
+            status={batch.status}
+            supplierNotifiedAt={batch.supplierNotifiedAt}
+            erpPayloadJson={batch.erpPayloadJson}
+            orderNumber={order.orderNumber}
+            batchNumber={batch.batchNumber}
+            passportReferenceId={batch.passport?.passportId}
+          />
+        </section>
       </div>
     </div>
   );
