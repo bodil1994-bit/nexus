@@ -1,36 +1,168 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Nexus - Beginner Setup Guide
 
-## Getting Started
+This guide is written for people with little or no development experience.
+Follow it top-to-bottom and copy/paste commands exactly.
 
-First, run the development server:
+## What this project is
+
+This is a Next.js web app with a local SQLite database managed by Prisma.
+
+- App framework: Next.js
+- Database: SQLite (local file)
+- ORM/tooling: Prisma
+
+## 1) Install required software
+
+You need these installed on your computer:
+
+1. Node.js 20+ (recommended: latest LTS)
+2. npm (comes with Node.js)
+3. Git (optional, but recommended)
+
+To check Node/npm:
+
+```bash
+node -v
+npm -v
+```
+
+## 2) Download and open the project
+
+If you already have the folder, open a terminal in the project root.
+If not:
+
+```bash
+git clone <your-repo-url>
+cd nexus
+```
+
+## 3) Install project dependencies
+
+Run:
+
+```bash
+npm install
+```
+
+This downloads all required packages.
+
+## 4) Environment file (.env)
+
+This project uses a `.env` file in the repo root.
+
+Expected value:
+
+```env
+DATABASE_URL="file:./dev.db"
+```
+
+If `.env` is missing, create it and paste that exact line.
+
+## 5) Initialize the database
+
+Run migration (creates tables):
+
+```bash
+npm run db:migrate -- --name init
+```
+
+Seed demo data:
+
+```bash
+npm run db:seed
+```
+
+After seeding, you should have:
+
+- 1 Supplier
+- 1 Manufacturer
+- 1 Order
+- 2 Batches
+
+## 6) Run the app
+
+Start development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open this in your browser:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- http://localhost:3000
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 7) Useful commands (copy/paste)
 
-## Learn More
+Run tests:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm test
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Run linter:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm run lint
+```
 
-## Deploy on Vercel
+Open Prisma Studio (database UI):
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm run db:studio
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Reset database completely (deletes data, then re-runs migrations):
+
+```bash
+npm run db:reset
+```
+
+## 8) Common issues and fixes
+
+### "Port 3000 is already in use"
+
+- Close the other app using port 3000, or run on another port:
+
+```bash
+npm run dev -- -p 3001
+```
+
+Then open http://localhost:3001
+
+### "Cannot find module" or dependency errors
+
+Run:
+
+```bash
+rm -rf node_modules package-lock.json
+npm install
+```
+
+Then try again.
+
+### Prisma or DB errors
+
+Try full reset:
+
+```bash
+npm run db:reset
+npm run db:seed
+```
+
+## 9) Project structure (only what you need)
+
+- `src/` - application code
+- `prisma/schema.prisma` - database schema
+- `prisma/seed.ts` - demo data seeding script
+- `.env` - local environment settings
+
+## 10) First-time success checklist
+
+Run these in order:
+
+1. `npm install`
+2. `npm run db:migrate -- --name init`
+3. `npm run db:seed`
+4. `npm run dev`
+
+If step 4 opens at `http://localhost:3000`, setup is complete.
