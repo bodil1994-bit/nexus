@@ -5,7 +5,8 @@ import { calculateDashboardStats } from '@/lib/manufacturer/dashboardStats';
 import { ManufacturerKpiCards } from './ManufacturerKpiCards';
 import { ManufacturerBatchTable, type OrderRow } from './ManufacturerBatchTable';
 import { ManufacturerBatchDetail } from './ManufacturerBatchDetail';
-import { LayoutDashboard, RefreshCcw, AlertCircle } from 'lucide-react';
+import Link from 'next/link';
+import { LayoutDashboard, RefreshCcw, AlertCircle, Plug } from 'lucide-react';
 
 export function ManufacturerDashboard() {
   const [orders, setOrders] = useState<OrderRow[] | null>(null);
@@ -83,6 +84,13 @@ export function ManufacturerDashboard() {
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 <span>EU Battery Reg. 2023/1542</span>
               </div>
+              <Link
+                href="/manufacturer/integrations"
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-slate-200 bg-white text-slate-600 text-[10px] font-bold uppercase tracking-widest hover:bg-slate-50 transition-colors"
+              >
+                <Plug size={10} />
+                <span>Integrations</span>
+              </Link>
             </div>
             <h1 className="text-4xl font-bold tracking-tight text-slate-900">
               {manufacturerName || 'Veloport Dashboard'}
