@@ -47,12 +47,12 @@ export function BatchActions({
           </p>
         </div>
 
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 flex items-start gap-3 shadow-sm">
-          <AlertCircle size={16} className="text-amber-600 mt-0.5" />
+        <div className="rounded-xl border border-orange-200 bg-orange-50 p-4 flex items-start gap-3 shadow-sm">
+          <AlertCircle size={16} className="text-orange-600 mt-0.5" />
           <div>
-             <p className="text-xs font-bold text-amber-700 uppercase tracking-tight">Sync Blocked</p>
+             <p className="text-xs font-bold text-orange-700 uppercase tracking-tight">Sync Blocked</p>
              {supplierNotifiedAt && (
-               <p className="text-[10px] text-amber-600/80 mt-1">Information request sent to supplier.</p>
+               <p className="text-[10px] text-orange-600/80 mt-1">Information request sent to supplier.</p>
              )}
           </div>
         </div>

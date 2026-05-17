@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { BatchStatusBadge } from '@/components/manufacturer/BatchStatusBadge';
-import { History, Plus, ChevronRight, CheckCircle2 } from 'lucide-react';
+import { History, Plus, ChevronRight, CheckCircle2, ArrowLeft } from 'lucide-react';
 
 export default async function BatchListPage() {
   const batches = await prisma.batch.findMany({
@@ -17,7 +17,24 @@ export default async function BatchListPage() {
         <div className="absolute bottom-[-10%] left-[-10%] h-[40%] w-[40%] rounded-full bg-emerald-500/5 blur-[120px]" />
       </div>
 
-      <div className="mx-auto max-w-7xl py-12 px-6">
+      {/* Nav */}
+      <nav className="flex items-center justify-between px-8 py-4 max-w-7xl mx-auto w-full">
+        <Link href="/" className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-emerald-500 flex items-center justify-center">
+            <span className="text-white font-bold text-base leading-none">v</span>
+          </div>
+          <span className="text-lg font-semibold tracking-tight text-slate-900">veloport</span>
+        </Link>
+        <div className="flex items-center gap-3">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 hidden sm:block">Battery Supplier Portal</span>
+          <Link href="/" className="flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-900 transition-colors">
+            <ArrowLeft size={13} />
+            Platform
+          </Link>
+        </div>
+      </nav>
+
+      <div className="mx-auto max-w-7xl py-8 px-6">
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 border border-emerald-200 text-emerald-700 text-[10px] font-bold uppercase tracking-widest mb-4">

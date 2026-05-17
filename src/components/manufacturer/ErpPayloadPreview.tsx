@@ -19,7 +19,7 @@ export function ErpPayloadPreview({
 }: Props) {
   if (status === 'INCOMPLETE') {
     return (
-      <div className="flex items-center gap-3 p-4 rounded-xl border border-amber-200 bg-amber-50 text-amber-700 shadow-sm">
+      <div className="flex items-center gap-3 p-4 rounded-xl border border-orange-200 bg-orange-50 text-orange-700 shadow-sm">
         <AlertCircle size={18} />
         <p className="text-sm font-medium">ERP sync blocked: Required fields missing.</p>
       </div>

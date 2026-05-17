@@ -46,7 +46,7 @@ describe('seedSupplierBatches', () => {
       'declarationOfConformityRef',
     ]);
     expect(batch!.supplierNotifiedAt).not.toBeNull();
-    expect(batch!.passport?.passportId).toBe('BAT-BSH-PT500-2024-008315');
+    expect(batch!.passport?.passportId).toBe('BAT-BSH-PT500-2026-008315');
   });
 
   it('battery data has key identification fields populated', async () => {

@@ -1,6 +1,6 @@
 import { parseMissingFields } from '@/lib/manufacturer/dashboardStats';
 import { BatchStatusBadge } from './BatchStatusBadge';
-import { Eye, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
+import { Eye, CheckCircle2, AlertTriangle, Clock } from 'lucide-react';
 
 export type BatchPassport = {
   id: string;
@@ -38,10 +38,10 @@ type Props = {
 };
 
 function ReadinessBar({ score }: { score: number }) {
-  const color = score === 100 ? 'bg-emerald-500' : score >= 70 ? 'bg-amber-400' : 'bg-red-400';
-  const textColor = score === 100 ? 'text-emerald-700' : score >= 70 ? 'text-amber-700' : 'text-red-600';
+  const color = score === 100 ? 'bg-emerald-500' : score >= 70 ? 'bg-amber-400' : 'bg-orange-500';
+  const textColor = score === 100 ? 'text-emerald-700' : score >= 70 ? 'text-amber-700' : 'text-orange-600';
   return (
-    <div className="flex items-center gap-2 min-w-[80px]">
+    <div className="flex items-center gap-2 min-w-[72px]">
       <div className="flex-1 h-1.5 rounded-full bg-slate-100 overflow-hidden">
         <div className={`h-full rounded-full ${color} transition-all`} style={{ width: `${score}%` }} />
       </div>
@@ -56,93 +56,97 @@ export function ManufacturerBatchTable({ orders, onSelectBatch }: Props) {
   );
 
   return (
-    <div className="mt-8 overflow-hidden rounded-2xl border border-white/60 bg-gradient-to-br from-white/80 to-white/40 shadow-[0_2px_16px_rgba(0,0,0,0.06)] backdrop-blur-xl">
-      <div className="overflow-x-auto">
-        <table className="min-w-full text-sm">
-          <thead>
-            <tr className="border-b border-slate-100 bg-slate-50/50 text-left">
-              <th className="px-6 py-4 font-semibold text-slate-500">Order</th>
-              <th className="px-6 py-4 font-semibold text-slate-500">Supplier</th>
-              <th className="px-6 py-4 font-semibold text-slate-500">Batch</th>
-              <th className="px-6 py-4 font-semibold text-slate-500">Passport ID</th>
-              <th className="px-6 py-4 font-semibold text-slate-500">Readiness</th>
-              <th className="px-6 py-4 font-semibold text-slate-500">Status</th>
-              <th className="px-6 py-4 font-semibold text-slate-500">Integration</th>
-              <th className="px-6 py-4 font-semibold text-slate-500 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {rows.map(({ order, batch }) => {
-              const missing = parseMissingFields(batch.missingFieldsJson);
-              return (
-                <tr key={batch.id} className="group transition-colors hover:bg-white/40">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-slate-900 font-medium">{order.orderNumber}</div>
-                    <div className="text-[10px] text-slate-400 font-mono uppercase tracking-tight">{batch.manufacturerSku}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-slate-600">{order.supplier.name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-slate-900 font-medium">{batch.batchNumber}</div>
-                    <div className="text-[10px] text-slate-400 uppercase tracking-tight">{batch.quantity} units</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="font-mono text-[10px] text-slate-500 bg-slate-50 px-2 py-1 rounded border border-slate-100">
-                      {batch.passport?.passportId ?? 'PENDING'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <ReadinessBar score={batch.readinessScore} />
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex flex-col gap-1.5">
-                      <BatchStatusBadge status={batch.status} />
-                      {batch.status === 'INCOMPLETE' && missing.length > 0 && (
-                        <div className="flex items-center gap-1 text-[10px] text-amber-600">
-                          <AlertCircle size={10} />
-                          <span>{missing.length} fields missing</span>
+    <div className="overflow-hidden rounded-2xl border border-white/60 bg-gradient-to-br from-white/80 to-white/40 shadow-[0_2px_16px_rgba(0,0,0,0.06)] backdrop-blur-xl">
+      <table className="min-w-full text-sm">
+        <thead>
+          <tr className="border-b border-slate-100 bg-slate-50/50 text-left">
+            <th className="px-4 py-3 font-semibold text-slate-500 text-xs">Order / Supplier</th>
+            <th className="px-4 py-3 font-semibold text-slate-500 text-xs">Batch</th>
+            <th className="px-4 py-3 font-semibold text-slate-500 text-xs">Passport ID</th>
+            <th className="px-4 py-3 font-semibold text-slate-500 text-xs">Readiness</th>
+            <th className="px-4 py-3 font-semibold text-slate-500 text-xs">Status</th>
+            <th className="px-4 py-3 font-semibold text-slate-500 text-xs text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-slate-100">
+          {rows.map(({ order, batch }) => {
+            const missing = parseMissingFields(batch.missingFieldsJson);
+            const isIncomplete = batch.status === 'INCOMPLETE';
+            return (
+              <tr key={batch.id} className={`group transition-colors ${isIncomplete ? 'bg-orange-50/40 hover:bg-orange-50/60' : 'hover:bg-white/40'}`}>
+                {/* Order + Supplier */}
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <div className="text-slate-900 font-medium text-xs">{order.orderNumber}</div>
+                  <div className="text-[10px] text-slate-500 mt-0.5">{order.supplier.name}</div>
+                  <div className="text-[10px] text-slate-400 font-mono">{batch.manufacturerSku}</div>
+                </td>
+
+                {/* Batch */}
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <div className="text-slate-900 font-medium text-xs">{batch.batchNumber}</div>
+                  <div className="text-[10px] text-slate-400 mt-0.5">{batch.quantity} units</div>
+                </td>
+
+                {/* Passport ID */}
+                <td className="px-4 py-3 whitespace-nowrap">
+                  {batch.passport?.passportId ? (
+                    <div className="flex flex-col gap-0.5">
+                      <span className="font-mono text-[10px] text-slate-600 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100 whitespace-nowrap w-fit">
+                        {batch.passport.passportId}
+                      </span>
+                      {batch.status === 'ERP_SYNCED' && (
+                        <div className="flex items-center gap-1 text-[10px] text-emerald-600 mt-0.5">
+                          <CheckCircle2 size={10} />
+                          <span>ERP synced</span>
                         </div>
                       )}
                     </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="space-y-1.5">
-                      <div className="flex items-center gap-2">
-                        {batch.supplierNotifiedAt ? (
-                          <CheckCircle2 size={13} className="text-emerald-500" />
-                        ) : (
-                          <Clock size={13} className="text-slate-300" />
-                        )}
-                        <span className={`text-[11px] ${batch.supplierNotifiedAt ? 'text-slate-700' : 'text-slate-400'}`}>
-                          Supplier notified
-                        </span>
+                  ) : (
+                    <span className="font-mono text-[10px] text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100 w-fit">
+                      PENDING
+                    </span>
+                  )}
+                </td>
+
+                {/* Readiness */}
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <ReadinessBar score={batch.readinessScore} />
+                </td>
+
+                {/* Status */}
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <div className="flex flex-col gap-1">
+                    <BatchStatusBadge status={batch.status} />
+                    {isIncomplete && missing.length > 0 && (
+                      <div className="flex items-center gap-1 text-[10px] text-orange-600">
+                        <AlertTriangle size={10} />
+                        <span>{missing.length} fields missing</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        {batch.status === 'ERP_SYNCED' ? (
-                          <CheckCircle2 size={13} className="text-emerald-500" />
-                        ) : (
-                          <Clock size={13} className="text-slate-300" />
-                        )}
-                        <span className={`text-[11px] ${batch.status === 'ERP_SYNCED' ? 'text-slate-700' : 'text-slate-400'}`}>
-                          ERP synced
-                        </span>
+                    )}
+                    {batch.supplierNotifiedAt && isIncomplete && (
+                      <div className="flex items-center gap-1 text-[10px] text-slate-400">
+                        <Clock size={10} />
+                        <span>Notified {new Date(batch.supplierNotifiedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</span>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-right whitespace-nowrap">
-                    <button
-                      onClick={() => onSelectBatch(batch.id)}
-                      className="inline-flex items-center gap-2 rounded-full bg-white border border-slate-200 px-4 py-1.5 text-xs font-medium text-slate-700 transition-all hover:bg-slate-50 hover:border-slate-300 shadow-sm"
-                    >
-                      <Eye size={13} />
-                      View Detail
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+                    )}
+                  </div>
+                </td>
+
+                {/* Actions */}
+                <td className="px-4 py-3 text-right whitespace-nowrap">
+                  <button
+                    onClick={() => onSelectBatch(batch.id)}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-white border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:bg-slate-50 hover:border-slate-300 shadow-sm"
+                  >
+                    <Eye size={12} />
+                    View
+                  </button>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }

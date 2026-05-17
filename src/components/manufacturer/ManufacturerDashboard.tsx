@@ -33,7 +33,7 @@ export function ManufacturerDashboard() {
           <p className="text-slate-500 max-w-xs">
             There was a problem connecting to the Veloport gateway. Please check your connection and try again.
           </p>
-          <button 
+          <button
             onClick={() => window.location.reload()}
             className="px-6 py-2 rounded-full bg-slate-900 text-white font-semibold hover:bg-slate-800 transition-colors"
           >
@@ -57,29 +57,46 @@ export function ManufacturerDashboard() {
 
   const manufacturerName = orders[0]?.manufacturer?.name;
   const stats = calculateDashboardStats(orders);
+  const allBatches = orders.flatMap((o) => o.batches);
+
+  const avgReadiness = allBatches.length > 0
+    ? Math.round(allBatches.reduce((sum, b) => sum + b.readinessScore, 0) / allBatches.length)
+    : 0;
+  const totalUnits = allBatches.reduce((sum, b) => sum + b.quantity, 0);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 relative overflow-hidden selection:bg-emerald-100">
-      {/* Background Glows */}
       <div className="fixed top-0 left-0 -z-10 h-full w-full overflow-hidden">
         <div className="absolute top-[-10%] right-[-10%] h-[40%] w-[40%] rounded-full bg-emerald-500/5 blur-[120px]" />
         <div className="absolute bottom-[-10%] left-[-10%] h-[40%] w-[40%] rounded-full bg-emerald-500/5 blur-[120px]" />
       </div>
 
       <div className="mx-auto max-w-7xl py-12 px-6">
-        <header className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <header className="mb-10 flex flex-col md:flex-row md:items-start justify-between gap-6">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 border border-emerald-200 text-emerald-700 text-[10px] font-bold uppercase tracking-widest mb-4">
-              <LayoutDashboard size={12} />
-              <span>Manufacturer Central</span>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 border border-emerald-200 text-emerald-700 text-[10px] font-bold uppercase tracking-widest">
+                <LayoutDashboard size={12} />
+                <span>Manufacturer Central</span>
+              </div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900 text-white text-[10px] font-bold uppercase tracking-widest">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span>EU Battery Reg. 2023/1542</span>
+              </div>
             </div>
             <h1 className="text-4xl font-bold tracking-tight text-slate-900">
               {manufacturerName || 'Veloport Dashboard'}
             </h1>
-            <p className="mt-2 text-slate-500 max-w-xl text-lg">
-              Monitor supplier battery passport submissions, analyze compliance readiness, 
-              and manage ERP synchronization for your global supply chain.
+            <p className="mt-2 text-slate-500 max-w-xl">
+              Battery passport compliance hub. Supplier data in, validated, ERP synced.
             </p>
+          </div>
+          <div className="flex-shrink-0 text-right">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Live Supply Chain</p>
+            <div className="flex items-center gap-1.5 justify-end">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-sm font-semibold text-emerald-700">Connected</span>
+            </div>
           </div>
         </header>
 
@@ -94,14 +111,14 @@ export function ManufacturerDashboard() {
             </p>
           </div>
         ) : (
-          <div className="space-y-12">
-            <ManufacturerKpiCards stats={stats} />
-            
+          <div className="space-y-6">
+            <ManufacturerKpiCards stats={stats} avgReadiness={avgReadiness} totalUnits={totalUnits} />
+
             <div>
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-4">
                 <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-slate-400">Global Batch Inventory</h2>
                 <span className="text-[10px] font-mono text-slate-500 px-2 py-1 bg-white/80 rounded border border-white shadow-sm">
-                  Showing {stats.totalBatches} active records
+                  {stats.totalBatches} active records
                 </span>
               </div>
               <ManufacturerBatchTable

@@ -63,7 +63,7 @@ export async function seedSupplierBatches(prisma: PrismaClient) {
         'carbonFootprintKgCo2ePerKwh',
         'declarationOfConformityRef',
       ]),
-      supplierNotifiedAt: new Date('2026-06-18T10:15:00.000Z'),
+      supplierNotifiedAt: new Date('2026-05-16T10:15:00.000Z'),
     },
   });
 

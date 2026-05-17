@@ -6,7 +6,7 @@ export function BatchStatusBadge({ status }: { status: string }) {
   let styles = '';
   switch (status) {
     case 'INCOMPLETE':
-      styles = 'bg-amber-100 text-amber-700 border border-amber-200/50';
+      styles = 'bg-orange-100 text-orange-800 border border-orange-300 shadow-orange-100';
       break;
     case 'ERP_SYNCED':
       styles = 'bg-emerald-100 text-emerald-700 border border-emerald-200/50';
