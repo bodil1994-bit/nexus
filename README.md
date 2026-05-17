@@ -22,6 +22,7 @@ Veloport connects battery manufacturers, bike manufacturers, and end customers a
 |------|-----|
 | Supplier upload | `http://localhost:3000/supplier/upload` |
 | Manufacturer dashboard | `http://localhost:3000/manufacturer/orders` |
+| ERP integration settings | `http://localhost:3000/manufacturer/integrations` |
 | Customer passport | `http://localhost:3000/passport/BAT-BSH-PT625-2026-008314` |
 
 ---
@@ -61,13 +62,32 @@ npm test             # run tests
 
 ---
 
+## ERP integration
+
+Manufacturers can connect one ERP system at `/manufacturer/integrations`. When a batch reaches **COMPLETE** status, the passport payload is pushed to the configured ERP automatically.
+
+Supported systems: **Odoo** (XML-RPC, no extra dependencies). The adapter pattern in `src/lib/erp/` makes it straightforward to add other systems.
+
+The sync is gated behind an environment variable — set it in `.env.production` or your deployment environment:
+
+```bash
+ERP_SYNC_ENABLED=true
+ODOO_BASE_URL=https://mycompany.odoo.com   # configured per manufacturer in the UI
+```
+
+In development (`npm run dev`) the sync is always skipped regardless of env vars — no Odoo instance required.
+
+---
+
 ## Project structure
 
 ```
 src/
   app/                  # Next.js routes and pages
   components/           # UI components
-  lib/                  # Business logic, data transformers
+  lib/
+    erp/                # ERP adapter interface, Odoo client, sync service
+    retailer/           # Passport view builder
 prisma/
   schema.prisma         # Database schema
   seed.ts               # Demo data
