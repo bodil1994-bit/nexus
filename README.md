@@ -26,63 +26,7 @@ Veloport connects battery manufacturers, bike manufacturers, and end customers a
 | `/supplier/batches/:id` | Supplier batch detail |
 | `/manufacturer/orders` | Manufacturer compliance dashboard |
 | `/manufacturer/integrations` | ERP integration settings |
-| `/manufacturer/erp` | ERP sync view (Odoo) |
 | `/passport/:passportId` | Public digital product passport |
-
----
-
-## API endpoints
-
-### `GET /api/manufacturer/orders`
-
-Returns all orders with associated suppliers, manufacturers, batches, and passport data.
-
-**Response**
-```json
-{
-  "orders": [
-    {
-      "id": "...",
-      "orderNumber": "ORD-KTM-BSH-2026",
-      "supplier": { ... },
-      "manufacturer": { ... },
-      "batches": [
-        {
-          "batchNumber": "BAT-BSH-PT625-002",
-          "status": "COMPLETE",
-          "passport": { ... }
-        }
-      ]
-    }
-  ]
-}
-```
-
----
-
-### `GET /api/passport/:passportId`
-
-Returns a single digital product passport by ID.
-
-**Response**
-```json
-{
-  "passport": {
-    "id": "...",
-    "passportId": "BAT-BSH-PT625-2026-008314",
-    "passportUrl": "...",
-    "passportType": "BATTERY",
-    "batteryData": { ... }
-  }
-}
-```
-
-**404** when passport not found:
-```json
-{ "error": "Not found" }
-```
-
----
 
 ## Stack
 
@@ -123,11 +67,10 @@ npm test             # run tests
 
 Manufacturers connect an ERP system at `/manufacturer/integrations`. When a batch reaches **COMPLETE** status, the passport payload is pushed to the configured ERP automatically.
 
-Supported: **Odoo** (XML-RPC). The adapter interface in `src/lib/erp/` supports additional systems.
+Supported: The adapter interface in `src/lib/erp/` supports additional systems.
 
 ```bash
 ERP_SYNC_ENABLED=true
-ODOO_BASE_URL=https://mycompany.odoo.com
 ```
 
 In development the sync is always skipped regardless of env vars.
@@ -140,11 +83,10 @@ In development the sync is always skipped regardless of env vars.
 src/
   app/                  # Next.js routes and pages
     api/
-      manufacturer/orders/    # GET /api/manufacturer/orders
       passport/[passportId]/  # GET /api/passport/:passportId
   components/           # UI components
   lib/
-    erp/                # ERP adapter interface, Odoo client, sync service
+    erp/                # ERP adapter interface, client, sync service
     retailer/           # Passport view builder
 prisma/
   schema.prisma         # Database schema
