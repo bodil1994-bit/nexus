@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { CANONICAL_FIELDS, mockExtract } from '@/lib/mock-extraction';
 import { createPassportReferenceId } from '@/lib/passport-reference';
 import { redirect } from 'next/navigation';
+import { syncBatchToErp } from '@/lib/erp/sync-service';
 
 export async function submitBatch(formData: FormData) {
   const orderNumber = formData.get('orderNumber') as string;
@@ -92,6 +93,10 @@ export async function submitBatch(formData: FormData) {
       },
     },
   });
+
+  if (finalStatus === 'COMPLETE') {
+    await syncBatchToErp(batch.id);
+  }
 
   redirect('/supplier/batches');
 }

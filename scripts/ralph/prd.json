@@ -1,7 +1,7 @@
 {
   "project": "Veloport",
-  "branchName": "feature/customer-passport-view",
-  "description": "Customer-facing Digital Product Passport: a public visualized passport page at /passport/[passportId], seeded end-to-end with the ERP-synced batch, and linked from the manufacturer dashboard.",
+  "branchName": "feature/erp-integration",
+  "description": "Generic modular ERP integration: manufacturer can configure one ERP connection (Odoo or generic); when a batch reaches COMPLETE status, the passport payload is synced to the ERP automatically. Sync is gated behind ERP_SYNC_ENABLED=true env var so npm run dev is unaffected.",
   "userStories": [
     {
       "id": "US-DPP-001",
@@ -85,6 +85,97 @@
         "npm run lint passes"
       ],
       "priority": 5,
+      "passes": true
+    },
+    {
+      "id": "US-ERP-001",
+      "title": "ErpIntegration schema: one integration per manufacturer",
+      "description": "As a developer, I need an ErpIntegration model linked to Manufacturer so each manufacturer can store exactly one ERP connection configuration.",
+      "acceptanceCriteria": [
+        "Add model ErpIntegration to prisma/schema.prisma with fields: id String @id @default(cuid()), manufacturerId String @unique, manufacturer Manufacturer @relation(fields: [manufacturerId], references: [id]), type String @default('ODOO'), baseUrl String, database String?, username String?, apiKey String, targetModel String @default('stock.lot'), enabled Boolean @default(true), createdAt DateTime @default(now()), updatedAt DateTime @updatedAt",
+        "Add back-relation to Manufacturer: erpIntegration ErpIntegration?",
+        "Run npx prisma migrate dev --name add_erp_integration and verify migration file created",
+        "Run npx prisma generate",
+        "Add seedErpIntegration(prisma, manufacturerId) helper in prisma/seed-helpers.ts that upserts an ErpIntegration with type='ODOO', baseUrl='https://demo.odoo.com', database='demo', username='admin', apiKey='demo-api-key', targetModel='stock.lot', enabled=false (disabled so it does not fire in dev)",
+        "Call seedErpIntegration in the main seed after manufacturer is created",
+        "Write src/tests/erp-integration-schema.test.ts with @vitest-environment node, import dotenv/config, test that ErpIntegration record can be queried and has correct defaults",
+        "npm run typecheck passes",
+        "npm test passes"
+      ],
+      "priority": 6,
+      "passes": true
+    },
+    {
+      "id": "US-ERP-002",
+      "title": "Generic ERP adapter interface and Odoo XML-RPC implementation",
+      "description": "As a developer, I need a typed adapter pattern so new ERP systems can be added without changing sync logic. The Odoo adapter uses XML-RPC over fetch with no new npm dependencies.",
+      "acceptanceCriteria": [
+        "Create src/lib/erp/types.ts exporting: ErpPayload { orderNumber: string; batchNumber: string; passportReferenceId: string; passportUrl: string }, ErpSyncResult { success: boolean; externalId?: string | number; error?: string; skipped?: boolean }, ErpAdapterConfig { type: string; baseUrl: string; database?: string | null; username?: string | null; apiKey: string; targetModel: string }",
+        "Export abstract interface ErpAdapter { sync(payload: ErpPayload): Promise<ErpSyncResult> } in src/lib/erp/types.ts",
+        "Create src/lib/erp/odoo-adapter.ts exporting class OdooAdapter implements ErpAdapter. Constructor takes ErpAdapterConfig. Implements two private methods: authenticate() which POSTs to {baseUrl}/xmlrpc/2/common with XML-RPC methodCall authenticate(db, username, password, {}) and parses the returned integer uid from the XML response using string parsing (no xml parser dep); sync(payload) which calls authenticate then POSTs to {baseUrl}/xmlrpc/2/object with XML-RPC execute_kw(db, uid, apiKey, targetModel, 'create', [{ name: payload.passportReferenceId, note: JSON.stringify(payload) }], {}) and returns { success: true, externalId: parsedId }. On any fetch error or non-200, return { success: false, error: message }.",
+        "XML-RPC request body must be built with a pure string template (no external xml lib). Helper buildXmlRpcCall(method, params): string where params is an array of JS primitives serialized to <value><string>|<int>|<boolean>|<struct>|<array> nodes.",
+        "Create src/lib/erp/adapter-factory.ts exporting getAdapter(config: ErpAdapterConfig): ErpAdapter that returns new OdooAdapter(config) for type 'ODOO' and throws Error('Unsupported ERP type') otherwise.",
+        "Create src/tests/odoo-adapter.test.ts with @vitest-environment node, mock global fetch using vi.stubGlobal, test: (1) authenticate returns uid from mocked XML response; (2) sync calls execute_kw and returns externalId on success; (3) sync returns { success: false, error } when fetch throws",
+        "npm run typecheck passes",
+        "npm test passes"
+      ],
+      "priority": 7,
+      "passes": true
+    },
+    {
+      "id": "US-ERP-003",
+      "title": "Sync service with ERP_SYNC_ENABLED guard",
+      "description": "As a developer, I need a sync service that is completely inert when ERP_SYNC_ENABLED is not 'true', so npm run dev is never affected.",
+      "acceptanceCriteria": [
+        "Create src/lib/erp/sync-service.ts exporting async function syncBatchToErp(batchId: string): Promise<ErpSyncResult>",
+        "First line of function body: if (process.env.ERP_SYNC_ENABLED !== 'true') return { success: false, skipped: true }",
+        "Query prisma.batch.findUnique({ where: { id: batchId }, include: { order: { include: { manufacturer: { include: { erpIntegration: true } } } }, passport: true } })",
+        "If batch not found return { success: false, error: 'Batch not found' }",
+        "If manufacturer.erpIntegration is null or erpIntegration.enabled === false return { success: false, skipped: true }",
+        "Build ErpAdapterConfig from erpIntegration fields",
+        "Build ErpPayload: { orderNumber: batch.order.orderNumber, batchNumber: batch.batchNumber, passportReferenceId: batch.passport?.passportId ?? batchId, passportUrl: batch.passport?.passportUrl ?? '' }",
+        "Call getAdapter(config).sync(payload)",
+        "On success: prisma.batch.update({ where: { id: batchId }, data: { status: 'ERP_SYNCED', erpSyncedAt: new Date(), erpPayloadJson: JSON.stringify(payload) } })",
+        "Return the ErpSyncResult from the adapter",
+        "Create src/tests/sync-service.test.ts with @vitest-environment node, import dotenv/config. Test (1): when ERP_SYNC_ENABLED is unset, returns { success: false, skipped: true } without touching DB. Test (2): when ERP_SYNC_ENABLED='true' but erpIntegration.enabled=false, returns { success: false, skipped: true }. Use vi.mock for prisma and adapter-factory.",
+        "npm run typecheck passes",
+        "npm test passes"
+      ],
+      "priority": 8,
+      "passes": true
+    },
+    {
+      "id": "US-ERP-004",
+      "title": "Manufacturer integration settings page",
+      "description": "As a manufacturer, I can visit /manufacturer/integrations to configure exactly one ERP integration (add, update, or remove it).",
+      "acceptanceCriteria": [
+        "Create src/app/manufacturer/integrations/page.tsx as an async server component. Query prisma.manufacturer.findFirst({ include: { erpIntegration: true } }). If no manufacturer found, show error. Pass erpIntegration (or null) to a client component IntegrationForm.",
+        "Create src/app/manufacturer/integrations/IntegrationForm.tsx as 'use client'. Props: integration: ErpIntegration | null. Renders a form with fields: Type (select with only option 'Odoo'), Base URL (text, placeholder 'https://mycompany.odoo.com'), Database (text, placeholder 'mycompany'), Username (text), API Key (password input), Target Model (text, default 'stock.lot'), Enabled (checkbox). Submit button label: integration ? 'Update Integration' : 'Connect ERP'. If integration exists, also show a 'Remove Integration' button that calls deleteIntegration action.",
+        "Create src/app/manufacturer/integrations/actions.ts with 'use server'. Export saveIntegration(formData: FormData) server action: upsert ErpIntegration on the first manufacturer (manufacturerId from findFirst). Fields: type, baseUrl, database, username, apiKey, targetModel, enabled (checkbox = 'on' means true). After upsert, revalidatePath('/manufacturer/integrations'). Export deleteIntegration(integrationId: string): find and delete, then revalidatePath.",
+        "Page header: 'ERP Integration' title + subtitle 'Connect your ERP system to automatically receive passport data when a batch is complete.'",
+        "If no integration: show an empty state card with a plug icon and the form below it.",
+        "If integration exists: show a status badge (green 'Active' if enabled, gray 'Disabled' if not) next to the integration type name, then the pre-filled form.",
+        "Add a nav link 'Integrations' to the manufacturer dashboard or nav (wherever other nav links exist in the manufacturer layout/page).",
+        "npm run typecheck passes",
+        "npm run lint passes"
+      ],
+      "priority": 9,
+      "passes": true
+    },
+    {
+      "id": "US-ERP-005",
+      "title": "Wire ERP sync trigger into submitBatch on COMPLETE status",
+      "description": "As a manufacturer, when a supplier uploads a batch with complete passport data the ERP integration is called automatically.",
+      "acceptanceCriteria": [
+        "In src/app/supplier/upload/actions.ts, after the prisma.batch.update call that sets status to finalStatus, add: if (finalStatus === 'COMPLETE') { await syncBatchToErp(batch.id) } — import syncBatchToErp from '@/lib/erp/sync-service'",
+        "The syncBatchToErp call is always safe: when ERP_SYNC_ENABLED is not 'true' it returns immediately with skipped:true, so the redirect and normal flow are unaffected",
+        "Verify that when finalStatus is 'INCOMPLETE', syncBatchToErp is NOT called",
+        "Update src/tests/sync-service.test.ts (or add a new test) to assert that when ERP_SYNC_ENABLED is unset and syncBatchToErp is called, it resolves to { success: false, skipped: true } within 5ms (no network call made)",
+        "npm run typecheck passes",
+        "npm test passes",
+        "npm run dev still starts without errors (no env var required)"
+      ],
+      "priority": 10,
       "passes": true
     }
   ]

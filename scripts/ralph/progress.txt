@@ -1,120 +1,75 @@
-# Ralph Progress Log
-Started: Fri May 16 2026
----
-
 ## Codebase Patterns
-- Prisma uses `@prisma/adapter-libsql` (PrismaLibSql) - always pass adapter when constructing PrismaClient
-- SQLite/LibSQL via Prisma does not support `String[]` - use `Json @default("[]")` for array fields
-- Tests needing PrismaClient must use `// @vitest-environment node` and import `dotenv/config`
-- Vitest global setup is jsdom - node-specific tests need per-file environment override
-- SQLite cannot handle concurrent writes: integration tests that only VERIFY seed data should query only (no re-seed), to avoid lock contention when running in parallel with seed-batches.test.ts
-- `fileParallelism: false` in vitest.config.ts breaks jsdom environment tests - do not use it; instead write read-only query tests
+- Delete ErpIntegration before Manufacturer in seed cleanup (FK constraint)
+- seed-helpers.ts returns `{ erpSyncedBatch, missingBatch, manufacturer }` — destructure in seed.ts
+- Tests hit real SQLite via libsql adapter — no mocking for DB schema tests
+- Seed must include PROCESSING batch (3 total) to satisfy seed-batches.test.ts
+- Recursive TypeScript types: use an intermediate interface to break circular alias (e.g. XmlRpcObject interface + XmlRpcValue type union)
 
+# Ralph Progress Log
+Started: Sun May 17 08:02:03 CEST 2026
 ---
 
-## 2026-05-16 - US-001
-- Added `createdAt DateTime @default(now())` and `updatedAt DateTime @updatedAt` to existing `Batch` model
-- Added `PassportDocument` model: id, batchId (FK), filename, extractedFields (Json), missingFields (Json), createdAt
-- Added `passportDocuments PassportDocument[]` back-relation on Batch
-- Applied migration: `20260516133923_add_batch_timestamps_passport_document`
-- Created `src/tests/prisma-models.test.ts` - Vitest node-env smoke test
-- Files changed: prisma/schema.prisma, prisma/migrations/.../migration.sql, src/tests/prisma-models.test.ts
+## 2026-05-17 08:05 - US-ERP-001
+- Added ErpIntegration model to prisma/schema.prisma with @unique manufacturerId back-relation
+- Added erpIntegration field to Manufacturer model
+- Ran migration: 20260517060255_add_erp_integration
+- Added seedErpIntegration helper (enabled=false, type='ODOO') in seed-helpers.ts
+- Updated seed.ts to call seedErpIntegration after manufacturer created
+- Added PROCESSING batch to seed (was missing; seed-batches.test.ts expected 3 batches)
+- Added erpIntegration.deleteMany() before manufacturer.deleteMany() in cleanup
+- Wrote src/tests/erp-integration-schema.test.ts
+- Files changed: prisma/schema.prisma, prisma/seed-helpers.ts, prisma/seed.ts, src/tests/erp-integration-schema.test.ts, prisma/migrations/
 - **Learnings for future iterations:**
-  - PrismaClient requires adapter: `new PrismaClient({ adapter: new PrismaLibSql({ url: ... }) })`
-  - `missingFields String[]` became `missingFields Json @default("[]")` - SQLite limitation
-  - Existing Batch model already had orderId relation (no direct orderNumber field) - later UI stories need to include order relation
+  - FK order in deleteMany: erpIntegration → order → manufacturer (not just manufacturer)
+  - seed-helpers.ts must return manufacturer for seedErpIntegration call in seed.ts
+  - Pre-existing failing test in seed-batches.test.ts required adding PROCESSING batch to seed
 ---
 
-## 2026-05-16 - US-002
-- Refactored seed into exportable `seedSupplierBatches(prisma)` in `prisma/seed-helpers.ts`
-- Creates 3 batches: processing (BAT-001), complete (BAT-002), missing_information (BAT-003)
-- Each batch has one PassportDocument with mocked extractedFields
-- complete batch: all 5 canonical fields populated; missing_information: 3 fields missing
-- Created `src/tests/seed-batches.test.ts` - 4 integration tests
-- Files changed: prisma/seed.ts, prisma/seed-helpers.ts, src/tests/seed-batches.test.ts
-- **Learnings:** Export seed helpers for testability; integration tests use afterAll to disconnect
-
-## 2026-05-16 - US-003
-- Created `/supplier/upload` route at `src/app/supplier/upload/page.tsx`
-- Form: orderNumber (text), batchNumber (text), files (multi-file, .csv/.json/.xlsx/.xml/.pdf/.txt), submit button
-- Added Supplier Upload + View Batches nav links to home page
-- Files changed: src/app/supplier/upload/page.tsx, src/app/page.tsx
-- **Learnings:** Next.js 16 App Router: form action= takes server action ref, encType needed for file uploads
-
-## 2026-05-16 - US-004
-- Created `src/lib/mock-extraction.ts` - `mockExtract(filename)` returns random complete/missing_information
-- Created `src/lib/prisma.ts` - global PrismaClient singleton with libsql adapter
-- Created `src/app/supplier/upload/actions.ts` - `submitBatch` server action
-- 3 Vitest unit tests for mock extraction contract
-- Files changed: 5 files
-- **Learnings:** `_: string` still triggers no-unused-vars warning (exit 0); server actions file input: use FormData.getAll('files') as File[]
-
-## 2026-05-16 - US-005
-- Created `/supplier/batches` - async server component, status badges, links to detail and upload
-- Files changed: src/app/supplier/batches/page.tsx
-
-## 2026-05-16 - US-006
-- Created `/supplier/batches/[id]` - shows 5 canonical fields, Missing badge for nulls, missing summary at top
-- Files changed: src/app/supplier/batches/[id]/page.tsx
-- **Learnings:** Next.js 16 dynamic params are a Promise - must `await params` before accessing id
----
-
-## 2026-05-16 - US-DPP-001
-- Changed erpSyncedBatch passport passportUrl from external Bosch URL to `/passport/BAT-BSH-PT625-2024-008314`
-- Added `passportUrl` key to erpPayloadJson for erpSyncedBatch
-- Changed missingBatch passportUrl to `/passport/BAT-BSH-PT500-2024-008315`
-- Created `src/tests/seed-passport-url.test.ts` - 2 query-only tests (no re-seed to avoid SQLite lock)
-- Files changed: prisma/seed-helpers.ts, src/tests/seed-passport-url.test.ts
+## 2026-05-17 08:15 - US-ERP-003
+- Created src/lib/erp/sync-service.ts: syncBatchToErp(batchId) with ERP_SYNC_ENABLED guard as first line
+- Queries batch with order.manufacturer.erpIntegration + passport includes
+- Returns skipped:true when env unset, integration null, or integration.enabled=false
+- On adapter success: updates batch status='ERP_SYNCED', erpSyncedAt, erpPayloadJson
+- Created src/tests/sync-service.test.ts: 5 tests covering all guard paths + success path
+- Used vi.mock for '@/lib/prisma' and '@/lib/erp/adapter-factory'
+- Files changed: src/lib/erp/sync-service.ts, src/tests/sync-service.test.ts
 - **Learnings for future iterations:**
-  - Vitest runs test files in parallel by default; SQLite can't handle concurrent writes - write verification tests as read-only queries
-  - `fileParallelism: false` in vitest.config.ts breaks jsdom environment for React component tests - avoid it
-  - seed-batches.test.ts is the canonical seeder in the test suite; other DB tests should query not re-seed
+  - vi.mock at module level, imports after — required for ESM mock hoisting in vitest
+  - Cast mocked prisma as `unknown as { batch: { findUnique: ReturnType<typeof vi.fn> } }` for type-safe mock access
+  - delete process.env.VAR in beforeEach/afterEach cleanly resets env for each test
 ---
 
-## 2026-05-16 - US-DPP-002
-- Created src/lib/retailer/buildRetailerPassport.ts: pure function + RetailerPassportView type
-- 5 positive flags, 5 negative flags (total 10); overallGrade from carbonFootprintPerformanceClassValue
-- 5 categories: carbon, recycled, performance, compliance, origin; each with 2+ data points
-- src/tests/buildRetailerPassport.test.ts: 6 Vitest tests (all unit, no DB)
-- Files changed: src/lib/retailer/buildRetailerPassport.ts, src/tests/buildRetailerPassport.test.ts
+## 2026-05-17 - US-ERP-005
+- Added syncBatchToErp call in submitBatch after batch.update, gated on finalStatus === 'COMPLETE'
+- Imported syncBatchToErp from '@/lib/erp/sync-service' in supplier upload actions.ts
+- Updated sync-service.test.ts: added timing assertion (elapsed < 5ms) to the ERP_SYNC_ENABLED-unset test
+- All 42 tests pass; dev flow unaffected (ERP_SYNC_ENABLED unset = immediate skipped return)
+- Files changed: src/app/supplier/upload/actions.ts, src/tests/sync-service.test.ts
 - **Learnings for future iterations:**
-  - buildRetailerPassport tests are pure unit tests (no DB, no env override needed)
-  - BatteryPassportData from @prisma/client is the input type - import directly
-  - renewableContentShare is a string field (not null/number) - check for empty string too
+  - Date.now() timing assertion works in Vitest node env for sub-5ms guard checks
+  - The sync guard returns synchronously (no await DB / network) so timing < 5ms is reliable
 ---
 
-## 2026-05-16 - US-DPP-003
-- Created `src/app/api/passport/[passportId]/route.ts` with GET handler
-- Queries `prisma.digitalProductPassport.findUnique({ where: { passportId }, include: { batteryData: true } })`
-- Returns 200 `{ passport: { id, passportId, passportUrl, passportType, batteryData } }` or 404 `{ error: 'Not found' }`
-- Files changed: src/app/api/passport/[passportId]/route.ts
+## 2026-05-17 - US-ERP-004
+- Created src/app/manufacturer/integrations/page.tsx: async server component, queries manufacturer with erpIntegration include, passes to IntegrationForm
+- Created src/app/manufacturer/integrations/IntegrationForm.tsx: 'use client', renders status badge + save form + separate delete form
+- Created src/app/manufacturer/integrations/actions.ts: saveIntegration (upsert) + deleteIntegration server actions
+- Added 'Integrations' nav link (with Plug icon) to ManufacturerDashboard header badge row
+- Files changed: src/app/manufacturer/integrations/page.tsx, IntegrationForm.tsx, actions.ts, src/components/manufacturer/ManufacturerDashboard.tsx
 - **Learnings for future iterations:**
-  - Next.js 16 dynamic route params in API routes: `params` is a Promise - must `await params` before destructuring
-  - Pattern matches existing manufacturer orders route (NextResponse.json, prisma import from @/lib/prisma)
+  - Nested forms are invalid HTML — split save and delete into sibling forms, not nested
+  - deleteIntegration.bind(null, id) works cleanly as a form action for parameterized server actions
+  - No manufacturer layout.tsx exists; nav links added inline to ManufacturerDashboard header badges area
 ---
 
-## 2026-05-16 - US-DPP-004
-- Created `src/app/passport/[passportId]/page.tsx` - async server component, queries prisma directly, passes RetailerPassportView to client component; renders 404 message if not found
-- Created `src/app/passport/[passportId]/PassportView.tsx` - 'use client' component with useState<'bike'|'battery'>, two screens: BikeScreen and BatteryScreen
-- BikeScreen: veloport header, e-bike hero image card, 2x2 grid of component cards; Battery card shows GradePill + model; other 3 show Coming soon badge
-- BatteryScreen: back button, header card with batteryModel + specs + large GradePill, ESG Profile flag chips (green/red), Category Breakdown accordion with lucide icons
-- GradePill inline component with grade->hex color map, two sizes (sm 28px, lg 56px)
-- Files changed: src/app/passport/[passportId]/page.tsx, src/app/passport/[passportId]/PassportView.tsx
-- Manual browser verification needed (no browser tools configured)
+## 2026-05-17 08:10 - US-ERP-002
+- Created src/lib/erp/types.ts: ErpPayload, ErpSyncResult, ErpAdapterConfig, ErpAdapter interface
+- Created src/lib/erp/odoo-adapter.ts: OdooAdapter with buildXmlRpcCall helper, XML string template serialization, string-based XML parsing
+- Created src/lib/erp/adapter-factory.ts: getAdapter() factory returning OdooAdapter for type 'ODOO'
+- Created src/tests/odoo-adapter.test.ts: 3 tests covering authenticate uid parsing, execute_kw success, fetch error handling via vi.stubGlobal
+- Files changed: src/lib/erp/types.ts, src/lib/erp/odoo-adapter.ts, src/lib/erp/adapter-factory.ts, src/tests/odoo-adapter.test.ts
 - **Learnings for future iterations:**
-  - Next.js 16 server component page: `params` is `Promise<{ passportId: string }>` - must `await params`
-  - Use `// eslint-disable-next-line @next/next/no-img-element` for plain `<img>` tags (next/image not required for external URLs in this codebase)
-  - RetailerPassportView and Grade types exported from @/lib/retailer/buildRetailerPassport - import both for type safety in client components
-  - Pattern: server page queries prisma + transforms data, passes plain serializable object to client component
----
-
-## 2026-05-16 - US-DPP-005
-- In `src/components/manufacturer/ManufacturerBatchDetail.tsx`, replaced Internal Passport URL dt/dd block with emerald CTA button
-- Button: `<a>` tag with target='_blank' rel='noopener noreferrer', styled as emerald pill with ExternalLink icon
-- Condition: `batch.status === 'ERP_SYNCED' && batch.passport?.passportUrl` (renders nothing otherwise)
-- Added ExternalLink to lucide-react import
-- Files changed: src/components/manufacturer/ManufacturerBatchDetail.tsx
-- **Learnings for future iterations:**
-  - ManufacturerBatchDetail is a server component (no 'use client') - use plain `<a>` tag not next/link for external/absolute href
-  - The passportUrl in the sidebar was already gated on `batch.passport?.passportUrl` - changed condition to also require ERP_SYNCED status
+  - TypeScript circular type alias error: use intermediate interface (XmlRpcObject) to break recursion
+  - vi.stubGlobal('fetch', mockFn) + afterEach vi.unstubAllGlobals() is the pattern for mocking fetch in vitest node env
+  - authenticate() is private but tested indirectly via first fetch call URL + uid presence in second call body
 ---
