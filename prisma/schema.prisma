@@ -14,9 +14,25 @@ model Supplier {
 }
 
 model Manufacturer {
-  id     String  @id @default(cuid())
-  name   String  @unique
-  orders Order[]
+  id             String          @id @default(cuid())
+  name           String          @unique
+  orders         Order[]
+  erpIntegration ErpIntegration?
+}
+
+model ErpIntegration {
+  id             String       @id @default(cuid())
+  manufacturerId String       @unique
+  manufacturer   Manufacturer @relation(fields: [manufacturerId], references: [id])
+  type           String       @default("ODOO")
+  baseUrl        String
+  database       String?
+  username       String?
+  apiKey         String
+  targetModel    String       @default("stock.lot")
+  enabled        Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 }
 
 model Order {

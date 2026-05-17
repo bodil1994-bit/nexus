@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { PrismaLibSql } from '@prisma/adapter-libsql';
 import { PrismaClient } from '@prisma/client';
-import { seedSupplierBatches } from './seed-helpers';
+import { seedErpIntegration, seedSupplierBatches } from './seed-helpers';
 
 const adapter = new PrismaLibSql({
   url: process.env.DATABASE_URL ?? 'file:./dev.db',
@@ -9,7 +9,8 @@ const adapter = new PrismaLibSql({
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  await seedSupplierBatches(prisma);
+  const { manufacturer } = await seedSupplierBatches(prisma);
+  await seedErpIntegration(prisma, manufacturer.id);
   console.log('Seeded PassportOps demo data');
 }
 

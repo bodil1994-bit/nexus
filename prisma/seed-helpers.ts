@@ -13,6 +13,7 @@ export async function seedSupplierBatches(prisma: PrismaClient) {
   await prisma.digitalProductPassport.deleteMany();
   await prisma.batch.deleteMany();
   await prisma.order.deleteMany();
+  await prisma.erpIntegration.deleteMany();
   await prisma.supplier.deleteMany();
   await prisma.manufacturer.deleteMany();
 
@@ -260,5 +261,22 @@ export async function seedSupplierBatches(prisma: PrismaClient) {
     },
   });
 
-  return { erpSyncedBatch, missingBatch };
+  return { erpSyncedBatch, missingBatch, manufacturer };
+}
+
+export async function seedErpIntegration(prisma: PrismaClient, manufacturerId: string) {
+  return prisma.erpIntegration.upsert({
+    where: { manufacturerId },
+    update: {},
+    create: {
+      manufacturerId,
+      type: 'ODOO',
+      baseUrl: 'https://demo.odoo.com',
+      database: 'demo',
+      username: 'admin',
+      apiKey: 'demo-api-key',
+      targetModel: 'stock.lot',
+      enabled: false,
+    },
+  });
 }
