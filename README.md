@@ -16,14 +16,71 @@ Veloport connects battery manufacturers, bike manufacturers, and end customers a
 
 ---
 
-## Demo flows
+## Application routes
 
-| Flow | URL |
-|------|-----|
-| Supplier upload | `http://localhost:3000/supplier/upload` |
-| Manufacturer dashboard | `http://localhost:3000/manufacturer/orders` |
-| ERP integration settings | `http://localhost:3000/manufacturer/integrations` |
-| Customer passport | `http://localhost:3000/passport/BAT-BSH-PT625-2026-008314` |
+| Route | Description |
+|-------|-------------|
+| `/` | Landing page |
+| `/supplier/upload` | Supplier battery document upload |
+| `/supplier/batches` | Supplier batch list |
+| `/supplier/batches/:id` | Supplier batch detail |
+| `/manufacturer/orders` | Manufacturer compliance dashboard |
+| `/manufacturer/integrations` | ERP integration settings |
+| `/manufacturer/erp` | ERP sync view (Odoo) |
+| `/passport/:passportId` | Public digital product passport |
+
+---
+
+## API endpoints
+
+### `GET /api/manufacturer/orders`
+
+Returns all orders with associated suppliers, manufacturers, batches, and passport data.
+
+**Response**
+```json
+{
+  "orders": [
+    {
+      "id": "...",
+      "orderNumber": "ORD-KTM-BSH-2026",
+      "supplier": { ... },
+      "manufacturer": { ... },
+      "batches": [
+        {
+          "batchNumber": "BAT-BSH-PT625-002",
+          "status": "COMPLETE",
+          "passport": { ... }
+        }
+      ]
+    }
+  ]
+}
+```
+
+---
+
+### `GET /api/passport/:passportId`
+
+Returns a single digital product passport by ID.
+
+**Response**
+```json
+{
+  "passport": {
+    "id": "...",
+    "passportId": "BAT-BSH-PT625-2026-008314",
+    "passportUrl": "...",
+    "passportType": "BATTERY",
+    "batteryData": { ... }
+  }
+}
+```
+
+**404** when passport not found:
+```json
+{ "error": "Not found" }
+```
 
 ---
 
@@ -53,7 +110,7 @@ Open `http://localhost:3000`.
 
 ```bash
 npm run dev          # start dev server
-npm run db:seed      # reset and reseed demo data
+npm run db:seed      # reset and reseed data
 npm run db:studio    # open database UI
 npm run typecheck    # TypeScript check
 npm run lint         # lint
@@ -64,18 +121,16 @@ npm test             # run tests
 
 ## ERP integration
 
-Manufacturers can connect one ERP system at `/manufacturer/integrations`. When a batch reaches **COMPLETE** status, the passport payload is pushed to the configured ERP automatically.
+Manufacturers connect an ERP system at `/manufacturer/integrations`. When a batch reaches **COMPLETE** status, the passport payload is pushed to the configured ERP automatically.
 
-Supported systems: **Odoo** (XML-RPC, no extra dependencies). The adapter pattern in `src/lib/erp/` makes it straightforward to add other systems.
-
-The sync is gated behind an environment variable — set it in `.env.production` or your deployment environment:
+Supported: **Odoo** (XML-RPC). The adapter interface in `src/lib/erp/` supports additional systems.
 
 ```bash
 ERP_SYNC_ENABLED=true
-ODOO_BASE_URL=https://mycompany.odoo.com   # configured per manufacturer in the UI
+ODOO_BASE_URL=https://mycompany.odoo.com
 ```
 
-In development (`npm run dev`) the sync is always skipped regardless of env vars — no Odoo instance required.
+In development the sync is always skipped regardless of env vars.
 
 ---
 
@@ -84,13 +139,16 @@ In development (`npm run dev`) the sync is always skipped regardless of env vars
 ```
 src/
   app/                  # Next.js routes and pages
+    api/
+      manufacturer/orders/    # GET /api/manufacturer/orders
+      passport/[passportId]/  # GET /api/passport/:passportId
   components/           # UI components
   lib/
     erp/                # ERP adapter interface, Odoo client, sync service
     retailer/           # Passport view builder
 prisma/
   schema.prisma         # Database schema
-  seed.ts               # Demo data
+  seed.ts               # Seed data
 ```
 
 ---
