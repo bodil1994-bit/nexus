@@ -1,320 +1,78 @@
-# Veloport - Beginner Setup Guide
+# Veloport
 
-This guide is written for people with little or no development experience.
-Follow it top-to-bottom and copy/paste commands exactly.
+Battery passport compliance infrastructure for the EU e-bike supply chain.
 
-## What this project is
+Veloport connects battery manufacturers, bike manufacturers, and end customers around the EU Battery Regulation 2023/1542 — turning messy supplier data into verified digital product passports, automatically.
 
-This is a Next.js web app with a local SQLite database managed by Prisma.
+---
 
-- App framework: Next.js
-- Database: SQLite (local file)
-- ORM/tooling: Prisma
+## What it does
 
-## 1) Install required software
+**Suppliers** upload battery documentation in any format. Veloport's AI extraction normalises it into a clean, regulation-compliant passport record.
 
-You need these installed on your computer:
+**Manufacturers** get a live compliance dashboard. Missing data is flagged immediately, suppliers are notified automatically, and complete batches are pushed to the manufacturer's ERP via API — no manual entry.
 
-1. Node.js 20+ (recommended: latest LTS)
-2. npm (comes with Node.js)
-3. Git (optional, but recommended)
+**Customers** scan a QR code and get a hosted digital passport: carbon footprint, recycled content, supply chain origin, and a live map of nearby recycling and repair points.
 
-To check Node/npm:
+---
 
-```bash
-node -v
-npm -v
-```
+## Demo flows
 
-## 2) Download and open the project
+| Flow | URL |
+|------|-----|
+| Supplier upload | `http://localhost:3000/supplier/upload` |
+| Manufacturer dashboard | `http://localhost:3000/manufacturer/orders` |
+| Customer passport | `http://localhost:3000/passport/BAT-BSH-PT625-2026-008314` |
 
-If you already have the folder, open a terminal in the project root.
-If not:
+---
 
-```bash
-git clone <your-repo-url>
-cd nexus
-```
+## Stack
 
-## 3) Install project dependencies
+- Next.js 16 · React 19
+- Prisma 7 · SQLite
+- Tailwind CSS 4
+- Vitest
 
-Run:
+---
+
+## Getting started
 
 ```bash
 npm install
-```
-
-This downloads all required packages.
-
-## 4) Environment file (.env)
-
-This project uses a `.env` file in the repo root.
-
-Expected value:
-
-```env
-DATABASE_URL="file:./dev.db"
-```
-
-If `.env` is missing, create it and paste that exact line.
-
-## 5) Initialize the database
-
-Run migration (creates tables):
-
-```bash
 npm run db:migrate -- --name init
-```
-
-Seed demo data:
-
-```bash
-npm run db:seed
-```
-
-After seeding, you should have:
-
-- 1 Supplier
-- 1 Manufacturer
-- 1 Order
-- 2 Batches
-
-## 6) Run the app
-
-Start development server:
-
-```bash
-npm run dev
-```
-
-Open this in your browser:
-
-- http://localhost:3000
-
-## 7) Useful commands (copy/paste)
-
-Run tests:
-
-```bash
-npm test
-```
-
-Run linter:
-
-```bash
-npm run lint
-```
-
-Open Prisma Studio (database UI):
-
-```bash
-npm run db:studio
-```
-
-Reset database completely (deletes data, then re-runs migrations):
-
-```bash
-npm run db:reset
-```
-
-## 7.1) Graphify for AI usage
-
-Graphify is installed globally for your user account.
-
-Binary location:
-
-```bash
-~/Library/Python/3.14/bin/graphify
-```
-
-Add it to your shell PATH (so `graphify` works directly):
-
-```bash
-echo 'export PATH="$HOME/Library/Python/3.14/bin:$PATH"' >> ~/.zshrc
-source ~/.zshrc
-```
-
-Quick verify:
-
-```bash
-graphify --version
-```
-
-Use it with your AI assistant:
-
-```bash
-/graphify .
-```
-
-## 8) Testing the supplier batch upload feature
-
-This feature lets a supplier submit a batch passport and see extraction results.
-
-### Setup
-
-Make sure the app is running and the database is seeded:
-
-```bash
 npm run db:seed
 npm run dev
 ```
 
-### Walkthrough
-
-1. Open http://localhost:3000
-2. Click **Supplier Upload**
-3. Select a manufacturer from the dropdown (KTM GmbH, Fisher, or Giro)
-4. Enter an order number, e.g. `ORD-9001`
-5. Enter a batch number, e.g. `BAT-100`
-6. Attach the sample file below and click **Submit Batch**
-7. You are redirected to http://localhost:3000/supplier/batches
-8. Find your new batch in the list — status is either `complete` or `missing information`
-9. Click the order number to open the batch detail page and see which fields were extracted
-
-### Sample upload file
-
-A ready-made CSV is included at `public/sample-passport.csv`. Download it from:
-
-```
-http://localhost:3000/sample-passport.csv
-```
-
-Contents:
-
-```csv
-field,value
-product_name,LFP Battery Pack 750Wh
-material,Lithium Iron Phosphate
-origin_country,Germany
-supplier_name,CellChem GmbH
-sustainability_notes,Certified carbon-neutral manufacturing process
-```
-
-> Extraction is mocked — the result (complete vs missing information) is random. Submit the same file multiple times to see both outcomes.
-
-### Seed data
-
-The seed creates three pre-populated batches you can browse without submitting anything:
-
-| Batch | Status |
-|-------|--------|
-| BAT-001 | processing |
-| BAT-002 | complete — all 5 fields populated |
-| BAT-003 | missing information — origin\_country, supplier\_name, sustainability\_notes missing |
-
-View them at http://localhost:3000/supplier/batches
+Open `http://localhost:3000`.
 
 ---
 
-## 9) Hackathon demo: Manufacturer Dashboard
-
-This section shows judges and reviewers how to run and navigate the manufacturer dashboard.
-
-### Setup
+## Key commands
 
 ```bash
-npm run db:seed
-npm run dev
+npm run dev          # start dev server
+npm run db:seed      # reset and reseed demo data
+npm run db:studio    # open database UI
+npm run typecheck    # TypeScript check
+npm run lint         # lint
+npm test             # run tests
 ```
-
-Open: http://localhost:3000/manufacturer/orders
-
-### What you will see
-
-**Header:** "Manufacturer Dashboard" with manufacturer name (Robert Bosch GmbH) pulled from seed data.
-
-**KPI cards (4 totals):**
-
-| Card | Value (seed data) |
-|------|-------------------|
-| Total batches | 3 |
-| Processing | 1 |
-| Incomplete | 1 |
-| ERP synced | 1 |
-
-**Batch table:** All batches from order `ORD-BSH-2024-0441`, submitted by Samsung SDI Co., Ltd.
-
-| Batch | SKU | Status | Notes |
-|-------|-----|--------|-------|
-| BAT-PT625-001 | BPT625 | Processing | Passport submitted, processing |
-| BAT-PT625-002 | BPT625 | ERP synced | All fields complete, synced |
-| BAT-PT500-003 | BPT500 | Incomplete | Missing fields, supplier notified |
-
-### Key interactions to demo
-
-**1. Incomplete batch:**
-- Click **View** on BAT-PT500-003
-- Detail panel shows: "Data missing" badge, list of missing fields with readable labels, supplier email, notification timestamp
-- Actions section shows: enrichment and retailer export blocked, "Data requested from supplier"
-
-**2. ERP synced batch:**
-- Click **View** on BAT-PT625-002
-- Detail panel shows: ERP sync timestamp, payload preview `{ orderNumber, batchNumber, passportReferenceId }`
-- Passport data section shows canonical battery fields (chemistry, capacity, carbon footprint, etc.)
-- Actions section shows: View enrichment, Retailer export, View ERP payload buttons
-
-**3. Processing batch:**
-- Click **View** on BAT-PT625-001
-- Detail panel shows: "ERP sync pending processing result." — no export actions yet
-
-### Run tests before demo
-
-```bash
-npm run typecheck
-npm run lint
-npm test
-```
-
-All checks must pass. Tests cover the API route, helper functions, and seed data shape.
 
 ---
 
-## 8) Common issues and fixes
+## Project structure
 
-### "Port 3000 is already in use"
-
-- Close the other app using port 3000, or run on another port:
-
-```bash
-npm run dev -- -p 3001
+```
+src/
+  app/                  # Next.js routes and pages
+  components/           # UI components
+  lib/                  # Business logic, data transformers
+prisma/
+  schema.prisma         # Database schema
+  seed.ts               # Demo data
 ```
 
-Then open http://localhost:3001
+---
 
-### "Cannot find module" or dependency errors
-
-Run:
-
-```bash
-rm -rf node_modules package-lock.json
-npm install
-```
-
-Then try again.
-
-### Prisma or DB errors
-
-Try full reset:
-
-```bash
-npm run db:reset
-npm run db:seed
-```
-
-## 9) Project structure (only what you need)
-
-- `src/` - application code
-- `prisma/schema.prisma` - database schema
-- `prisma/seed.ts` - demo data seeding script
-- `.env` - local environment settings
-
-## 10) First-time success checklist
-
-Run these in order:
-
-1. `npm install`
-2. `npm run db:migrate -- --name init`
-3. `npm run db:seed`
-4. `npm run dev`
-
-If step 4 opens at `http://localhost:3000`, setup is complete.
+Built for EU Battery Regulation 2023/1542 compliance. Passport v1.0 · 2026.
